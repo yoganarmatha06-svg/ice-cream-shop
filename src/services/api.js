@@ -1,11 +1,33 @@
 import axios from 'axios';
 
+// Render backend URL (configured from Vercel env or default deployed URL)
+export const BACKEND_URL =
+  import.meta.env.VITE_API_URL || 'https://ice-cream-shop-rpze.onrender.com';
+
+// Use local proxy in dev, direct Render backend URL in production
+const API_BASE = import.meta.env.DEV
+  ? '/api'
+  : `${BACKEND_URL.replace(/\/$/, '')}/api`;
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
+
+// Helper for resolving image uploads
+export const getFullImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  if (path.startsWith('/uploads')) {
+    return `${BACKEND_URL.replace(/\/$/, '')}${path}`;
+  }
+  return path;
+};
 
 // Interceptor to attach JWT token
 api.interceptors.request.use(
