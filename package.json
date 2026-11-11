@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "bulid": "vite build",
     "preview": "vite preview",
     "server": "cd server && npm run dev",
     "dev:all": "concurrently -n \"SERVER,CLIENT\" -c \"magenta,cyan\" \"npm run server\" \"npm run dev\""
