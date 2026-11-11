@@ -7,7 +7,7 @@ export const generateToken = (id, role = 'user') => {
   return jwt.sign(
     { id, role },
     process.env.JWT_SECRET || 'scoop_dreams_artisan_secret_key_2026_super_secure',
-    { expiresIn: '30d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
   );
 };
 
