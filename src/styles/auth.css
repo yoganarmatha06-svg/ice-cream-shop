@@ -1,0 +1,189 @@
+.auth-page-wrapper {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: radial-gradient(circle at 50% 30%, #fff0f3 0%, #fffdfa 70%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 40px;
+  box-shadow: 0 25px 60px -10px rgba(225, 29, 72, 0.12);
+  border: 1px solid var(--border-soft);
+  text-align: center;
+}
+
+.auth-logo {
+  font-family: var(--font-brand);
+  font-size: 2.8rem;
+  color: var(--chocolate-dark);
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 28px;
+}
+
+.auth-form {
+  text-align: left;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+}
+
+/* Quick Fill Demo Login Pills */
+.demo-accounts-box {
+  margin-top: 24px;
+  padding: 16px;
+  background: #fdf2f4;
+  border-radius: 20px;
+  border: 1px dashed #fbcfe8;
+  text-align: center;
+}
+
+.demo-pills {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.demo-pill-btn {
+  background: #ffffff;
+  border: 1px solid #f472b6;
+  color: var(--strawberry);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.demo-pill-btn:hover {
+  background: var(--strawberry);
+  color: #fff;
+}
+
+/* User Profile Page */
+.profile-wrapper {
+  padding: 40px 0 80px;
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+.profile-sidebar-card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 32px 24px;
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--card-shadow);
+  text-align: center;
+}
+
+.profile-avatar-icon-big {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #ffe4e6;
+  color: var(--strawberry);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  border: 4px solid var(--pastel-pink);
+  box-shadow: 0 8px 20px rgba(225, 29, 72, 0.12);
+}
+
+.profile-avatar-big {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  object-fit: cover;
+  border: 4px solid var(--pastel-pink);
+}
+
+.profile-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
+  text-align: left;
+}
+
+.profile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.profile-nav-item.active,
+.profile-nav-item:hover {
+  background: var(--pastel-pink);
+  color: var(--strawberry);
+}
+
+@media (max-width: 900px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .auth-page-wrapper {
+    padding: 24px 14px;
+    min-height: 85vh;
+  }
+
+  .auth-card {
+    padding: 28px 20px;
+    border-radius: 24px;
+  }
+
+  .auth-logo {
+    font-size: 2.2rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.88rem;
+    margin-bottom: 22px;
+  }
+
+  .form-input {
+    font-size: 16px; /* Prevents auto-zoom on mobile browsers */
+  }
+
+  .demo-accounts-box {
+    padding: 12px;
+  }
+
+  .demo-pills {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .demo-pill-btn {
+    width: 100%;
+    padding: 8px 12px;
+  }
+}
