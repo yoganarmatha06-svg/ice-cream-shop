@@ -211,7 +211,8 @@ const Product3DRotator = ({
               src={imgError && fallbackSrc ? fallbackSrc : src}
               alt={alt}
               className={`product-3d-img ${imageClassName}`}
-              loading="lazy"
+              loading="eager"
+              decoding="async"
               onError={() => {
                 if (!imgError && fallbackSrc) {
                   setImgError(true);

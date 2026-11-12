@@ -24,14 +24,12 @@ const getFlavorClass = (flavour = '') => {
 };
 
 const cardItemVariants = {
-  hidden: { opacity: 0, y: 35, scale: 0.94, filter: 'blur(4px)' },
+  hidden: { opacity: 1, y: 0 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
-    filter: 'blur(0px)',
     transition: {
-      duration: 0.65,
+      duration: 0.3,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -81,12 +79,12 @@ const ProductCard = ({ product, customVariants = cardItemVariants }) => {
     <>
       <motion.div
         className="product-card"
-        variants={customVariants}
+        initial={{ opacity: 1, y: 0 }}
+        animate={{ opacity: 1, y: 0 }}
         whileHover={{
           y: -10,
           transition: { type: 'spring', stiffness: 350, damping: 25 },
         }}
-        viewport={{ once: false, amount: 0.15 }}
       >
         {/* Pastel Visual Container */}
         <div className={`product-card-visual ${flavorClass}`}>

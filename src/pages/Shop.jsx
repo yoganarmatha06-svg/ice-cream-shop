@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import { Search, Filter, X, RotateCcw } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import Loader from '../components/Loader';
-import ScrollReveal, { StaggerContainer } from '../components/ScrollReveal';
 import { productsAPI, categoriesAPI } from '../services/api';
 import '../styles/shop.css';
 
@@ -93,26 +92,23 @@ const Shop = () => {
   return (
     <div className="shop-page-wrapper">
       <div className="container">
-        {/* Shop Header Banner with Smooth Zoom & Fade */}
-        <ScrollReveal animation="zoom-in" duration={0.7} distance={20}>
-          <div className="shop-header-banner">
-            <div className="shop-banner-content">
-              <span className="badge badge-pink" style={{ marginBottom: '10px' }}>
-                The Scoop Collection
-              </span>
-              <h1>Explore All Artisanal Flavours</h1>
-              <p>
-                Handmade daily in refrigerated small batches using pure organic milk, single-origin cacao, and seasonal berries.
-              </p>
-            </div>
+        {/* Shop Header Banner */}
+        <div className="shop-header-banner">
+          <div className="shop-banner-content">
+            <span className="badge badge-pink" style={{ marginBottom: '10px' }}>
+              The Scoop Collection
+            </span>
+            <h1>Explore All Artisanal Flavours</h1>
+            <p>
+              Handmade daily in refrigerated small batches using pure organic milk, single-origin cacao, and seasonal berries.
+            </p>
           </div>
-        </ScrollReveal>
+        </div>
 
         {/* Shop Layout */}
         <div className="shop-layout">
           {/* Left Sidebar Filter */}
-          <ScrollReveal animation="fade-right" distance={35}>
-            <aside className="shop-sidebar">
+          <aside className="shop-sidebar">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--chocolate-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Filter size={18} /> Filters
@@ -197,13 +193,11 @@ const Shop = () => {
                 </div>
               </div>
             </aside>
-          </ScrollReveal>
 
           {/* Right Main Content */}
           <main>
             {/* Toolbar */}
-            <ScrollReveal animation="fade-down" distance={20}>
-              <div className="shop-toolbar">
+            <div className="shop-toolbar">
                 {/* Search Bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--pastel-pink)', padding: '8px 16px', borderRadius: 'var(--radius-full)', minWidth: '260px' }}>
                   <Search size={18} color="var(--strawberry)" />
@@ -238,8 +232,7 @@ const Shop = () => {
                   </div>
                 </div>
               </div>
-            </ScrollReveal>
-
+  
             {/* Active Filters Pills */}
             {hasActiveFilters && (
               <div className="active-filters-row">
@@ -271,43 +264,36 @@ const Shop = () => {
               </div>
             )}
 
-            {/* Products Grid with Stagger Animation */}
+            {/* Products Grid */}
             {loading ? (
               <Loader text="Churning through our parlour shelves..." />
             ) : products.length > 0 ? (
-              <StaggerContainer
-                key={`${selectedCategory}-${searchQuery}-${flavourFilter}-${sortOption}-${maxPrice}`}
-                className="products-grid"
-                staggerDelay={0.08}
-                initialDelay={0.1}
-              >
+              <div className="products-grid">
                 {products.map((product) => (
                   <ProductCard key={product._id} product={product} />
                 ))}
-              </StaggerContainer>
+              </div>
             ) : (
-              <ScrollReveal animation="zoom-in">
-                <div
-                  style={{
-                    background: '#ffffff',
-                    borderRadius: '28px',
-                    padding: '60px 20px',
-                    textAlign: 'center',
-                    border: '1px solid var(--border-soft)',
-                  }}
-                >
-                  <div style={{ fontSize: '3rem', marginBottom: '14px' }}>🍦</div>
-                  <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.6rem', color: 'var(--chocolate-dark)', marginBottom: '8px' }}>
-                    No Scoops Match Your Search
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                    Try adjusting your price range, searching for another ingredient, or reset your filters.
-                  </p>
-                  <button type="button" onClick={resetAllFilters} className="btn-primary">
-                    Clear All Filters
-                  </button>
-                </div>
-              </ScrollReveal>
+              <div
+                style={{
+                  background: '#ffffff',
+                  borderRadius: '28px',
+                  padding: '60px 20px',
+                  textAlign: 'center',
+                  border: '1px solid var(--border-soft)',
+                }}
+              >
+                <div style={{ fontSize: '3rem', marginBottom: '14px' }}>🍦</div>
+                <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.6rem', color: 'var(--chocolate-dark)', marginBottom: '8px' }}>
+                  No Scoops Match Your Search
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                  Try adjusting your price range, searching for another ingredient, or reset your filters.
+                </p>
+                <button type="button" onClick={resetAllFilters} className="btn-primary">
+                  Clear All Filters
+                </button>
+              </div>
             )}
           </main>
         </div>
