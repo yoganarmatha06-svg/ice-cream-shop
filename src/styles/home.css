@@ -280,38 +280,135 @@
   text-align: center;
   box-shadow: var(--card-shadow);
   border: 1px solid var(--border-soft);
-  transition: var(--transition-smooth);
+  transition: box-shadow 0.35s ease, border-color 0.35s ease, background 0.35s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
+  perspective: 1000px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  position: relative;
+  user-select: none;
 }
 
 .category-card:hover {
-  transform: translateY(-8px);
   box-shadow: var(--card-shadow-hover);
   border-color: #fbcfe8;
 }
 
-.category-img-wrapper {
+/* 3D Stage for the category scoop orb */
+.category-3d-stage {
+  perspective: 800px;
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Soft Flavor-Tinted Ambient Glow Aura */
+.category-3d-ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 120%;
+  transform: translate(-50%, -50%) translateZ(-15px);
+  border-radius: 50%;
+  filter: blur(20px);
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Floating & 3D Rotating Core */
+.category-3d-floating-core {
+  position: relative;
+  z-index: 3;
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  margin-bottom: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-  border: 4px solid var(--pastel-pink);
+  transform-style: preserve-3d;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.category-img-wrapper img {
+/* Circular Scoop Frame with 3D Depth */
+.category-3d-orb-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 14px 28px -6px rgba(45, 24, 16, 0.22), 0 4px 10px rgba(45, 24, 16, 0.08);
+  border: 4px solid #ffffff;
+  transform: translateZ(24px);
+  transform-style: preserve-3d;
+}
+
+.category-3d-orb-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+  border-radius: 50%;
+  pointer-events: none;
+  user-select: none;
+  transform: translateZ(10px);
+  filter: saturate(1.08) contrast(1.02);
   transition: transform 0.4s ease;
 }
 
-.category-card:hover .category-img-wrapper img {
-  transform: scale(1.15);
+/* Specular Light Sheen */
+.category-3d-specular-sheen {
+  position: absolute;
+  width: 140%;
+  height: 140%;
+  transform: translate(-50%, -50%) translateZ(30px);
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 6;
+  will-change: transform, opacity;
+}
+
+/* Subtle 3D Rim Accent */
+.category-3d-rim-accent {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 7;
+  transform: translateZ(26px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+/* Realistic Dynamic Floor Shadow */
+.category-3d-floor-shadow {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) translateZ(-20px);
+  width: 76%;
+  height: 20px;
+  border-radius: 50%;
+  filter: blur(6px);
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.category-3d-content {
+  transform: translateZ(18px);
+  transition: transform 0.3s ease;
+  text-align: center;
 }
 
 .category-title {
