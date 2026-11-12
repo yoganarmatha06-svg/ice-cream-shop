@@ -229,6 +229,7 @@
    ========================================================================== */
 .section-wrapper {
   padding: 90px 0;
+  scroll-margin-top: 80px;
 }
 
 .section-header-center {

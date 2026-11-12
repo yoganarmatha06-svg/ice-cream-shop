@@ -119,6 +119,9 @@ const Footer = () => {
                 <a href="/#about" style={{ color: '#d5c7c5' }}>Our Artisan Story</a>
               </li>
               <li>
+                <a href="/#why-us" style={{ color: '#d5c7c5' }}>Why Choose Us</a>
+              </li>
+              <li>
                 <Link to="/cart" style={{ color: '#d5c7c5' }}>Shopping Bag</Link>
               </li>
             </ul>

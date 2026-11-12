@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -30,6 +30,34 @@ const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const { cartCount, toastMessage } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const scrollToSection = (sectionId) => {
+    const el = document.getElementById(sectionId);
+    if (el) {
+      const navbarHeight = 85;
+      const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: Math.max(0, elementPosition - navbarHeight),
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const handleNavSectionClick = (e, sectionId) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+
+    if (location.pathname === '/') {
+      scrollToSection(sectionId);
+      window.history.pushState(null, '', `#${sectionId}`);
+    } else {
+      navigate(`/#${sectionId}`);
+      setTimeout(() => {
+        scrollToSection(sectionId);
+      }, 250);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -107,19 +135,31 @@ const Navbar = () => {
 
           {/* Desktop Navigation Links */}
           <nav className="nav-menu">
-            <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive && !location.hash ? 'active' : ''}`}>
               Home
             </NavLink>
             <NavLink to="/shop" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               Shop
             </NavLink>
-            <a href="/#categories" className="nav-link">
+            <a
+              href="/#categories"
+              onClick={(e) => handleNavSectionClick(e, 'categories')}
+              className={`nav-link ${location.pathname === '/' && location.hash === '#categories' ? 'active' : ''}`}
+            >
               Categories
             </a>
-            <a href="/#about" className="nav-link">
+            <a
+              href="/#about"
+              onClick={(e) => handleNavSectionClick(e, 'about')}
+              className={`nav-link ${location.pathname === '/' && location.hash === '#about' ? 'active' : ''}`}
+            >
               About
             </a>
-            <a href="/#why-us" className="nav-link">
+            <a
+              href="/#why-us"
+              onClick={(e) => handleNavSectionClick(e, 'why-us')}
+              className={`nav-link ${location.pathname === '/' && location.hash === '#why-us' ? 'active' : ''}`}
+            >
               Why Us
             </a>
           </nav>
@@ -303,9 +343,9 @@ const Navbar = () => {
                   {[
                     { to: '/', label: 'Home', badge: '🍓 Fresh' },
                     { to: '/shop', label: 'All Flavours', badge: '12+ Recipes' },
-                    { to: '/#categories', label: 'Categories' },
-                    { to: '/#about', label: 'Our Artisan Story' },
-                    { to: '/#why-us', label: 'Why Choose Us' },
+                    { section: 'categories', label: 'Categories' },
+                    { section: 'about', label: 'Our Artisan Story' },
+                    { section: 'why-us', label: 'Why Choose Us' },
                     { to: '/cart', label: `Shopping Bag (${cartCount})` },
                     ...(isAuthenticated ? [{ to: '/my-orders', label: 'My Ice Cream Orders' }] : []),
                   ].map((item, idx) => (
@@ -316,11 +356,11 @@ const Navbar = () => {
                         visible: { opacity: 1, x: 0 },
                       }}
                     >
-                      {item.to.startsWith('/#') ? (
+                      {item.section ? (
                         <a
-                          href={item.to.slice(1)}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="mobile-drawer-link"
+                          href={`/#${item.section}`}
+                          onClick={(e) => handleNavSectionClick(e, item.section)}
+                          className={`mobile-drawer-link ${location.pathname === '/' && location.hash === `#${item.section}` ? 'active' : ''}`}
                         >
                           <span>{item.label}</span>
                         </a>
@@ -329,7 +369,7 @@ const Navbar = () => {
                           to={item.to}
                           onClick={() => setMobileMenuOpen(false)}
                           className={({ isActive }) =>
-                            `mobile-drawer-link ${isActive ? 'active' : ''} ${item.highlight ? 'admin-highlight' : ''}`
+                            `mobile-drawer-link ${isActive && !location.hash ? 'active' : ''} ${item.highlight ? 'admin-highlight' : ''}`
                           }
                         >
                           <span>{item.label}</span>

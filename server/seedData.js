@@ -307,7 +307,7 @@ export const seedDatabase = async () => {
         price: 5.95,
         discountPrice: 5.25,
         category: catMap['butterscotch'],
-        image: 'https://images.unsplash.com/photo-1560008511-11c63416e52d?auto=format&fit=crop&w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1708192547245-f2a7a366fc22?auto=format&fit=crop&w=600&q=80',
         flavour: 'Butterscotch & Caramel',
         stock: 50,
         rating: 4.8,
