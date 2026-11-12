@@ -16,6 +16,7 @@ import {
 import HeroSection from '../components/HeroSection';
 import CategoryCard from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
+import Product3DShowcase from '../components/Product3DShowcase';
 import Loader from '../components/Loader';
 import ScrollReveal, { StaggerContainer, StaggerItem, TextReveal } from '../components/ScrollReveal';
 import { productsAPI, categoriesAPI } from '../services/api';
@@ -102,6 +103,9 @@ const Home = () => {
           )}
         </div>
       </section>
+
+      {/* 2b. Interactive 3D Product Stage (Vanilla, Chocolate, Strawberry, Mango, Blueberry) */}
+      <Product3DShowcase />
 
       {/* 3. Best Selling Products Section with Stagger Animation */}
       <section className="section-wrapper" style={{ background: 'var(--cream-white)' }}>

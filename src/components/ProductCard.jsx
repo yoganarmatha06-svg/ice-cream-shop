@@ -4,6 +4,8 @@ import { Heart, ShoppingBag, Eye, Star, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import Product3DRotator from './Product3DRotator';
+import { categoryImages } from '../assets/images/categories';
 
 const getFlavorClass = (flavour = '') => {
   const f = flavour.toLowerCase();
@@ -44,6 +46,24 @@ const ProductCard = ({ product, customVariants = cardItemVariants }) => {
 
   const isFavorited = isInWishlist(product._id);
   const flavorClass = getFlavorClass(product.flavour || product.name);
+
+  // Match local high-res asset image or fallback to product.image
+  const resolveProductImage = () => {
+    if (product.image && !product.image.includes('unsplash.com')) {
+      return product.image;
+    }
+    const nameLower = (product.name || '').toLowerCase();
+    const flavLower = (product.flavour || '').toLowerCase();
+    for (const [key, val] of Object.entries(categoryImages)) {
+      const cleanKey = key.replace(/-/g, ' ');
+      if (nameLower.includes(cleanKey) || flavLower.includes(cleanKey)) {
+        return val;
+      }
+    }
+    return product.image || categoryImages.vanilla;
+  };
+
+  const displayImage = resolveProductImage();
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
@@ -94,18 +114,14 @@ const ProductCard = ({ product, customVariants = cardItemVariants }) => {
             <Eye size={14} /> Quick View
           </button>
 
-          {/* Product Cone Image with Smooth Spring Zoom on Hover */}
-          <Link to={`/products/${product._id}`}>
-            <motion.img
-              src={product.image}
+          {/* 3D Rotating & Floating Product Core with Interactive Cursor Tilt */}
+          <Link to={`/products/${product._id}`} style={{ display: 'block', textDecoration: 'none' }}>
+            <Product3DRotator
+              src={displayImage}
               alt={product.name}
-              className="product-card-img"
-              loading="lazy"
-              whileHover={{ scale: 1.1, rotate: -1.5 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              onError={(e) => {
-                e.target.src = 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=500&q=80';
-              }}
+              flavor={product.flavour || product.name}
+              size="md"
+              fallbackSrc="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=500&q=80"
             />
           </Link>
         </div>
@@ -180,12 +196,14 @@ const ProductCard = ({ product, customVariants = cardItemVariants }) => {
             <div className="quick-view-grid">
               <div
                 className={`product-card-visual ${flavorClass}`}
-                style={{ height: '320px', margin: 0, borderRadius: '24px' }}
+                style={{ height: '340px', margin: 0, borderRadius: '24px' }}
               >
-                <img
-                  src={product.image}
+                <Product3DRotator
+                  src={displayImage}
                   alt={product.name}
-                  style={{ width: '220px', height: '260px', objectFit: 'cover', borderRadius: '20px' }}
+                  flavor={product.flavour || product.name}
+                  size="lg"
+                  fallbackSrc="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=500&q=80"
                 />
               </div>
 

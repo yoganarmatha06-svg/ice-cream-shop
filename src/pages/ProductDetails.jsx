@@ -13,6 +13,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import Product3DRotator from '../components/Product3DRotator';
+import { categoryImages } from '../assets/images/categories';
 import Loader from '../components/Loader';
 import ScrollReveal, { StaggerContainer, StaggerItem } from '../components/ScrollReveal';
 import { productsAPI } from '../services/api';
@@ -40,6 +42,22 @@ const ProductDetails = () => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated, user } = useAuth();
+
+  const resolveProductImage = (prod) => {
+    if (!prod) return '';
+    if (prod.image && !prod.image.includes('unsplash.com')) {
+      return prod.image;
+    }
+    const nameLower = (prod.name || '').toLowerCase();
+    const flavLower = (prod.flavour || '').toLowerCase();
+    for (const [key, val] of Object.entries(categoryImages)) {
+      const cleanKey = key.replace(/-/g, ' ');
+      if (nameLower.includes(cleanKey) || flavLower.includes(cleanKey)) {
+        return val;
+      }
+    }
+    return prod.image || categoryImages.vanilla;
+  };
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -133,26 +151,28 @@ const ProductDetails = () => {
         <div className="product-details-grid">
           {/* Gallery View with Slide From Left */}
           <ScrollReveal animation="fade-right" distance={50} duration={0.8}>
-            <div className="product-gallery-frame">
+            <div className="product-gallery-frame" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '440px', position: 'relative' }}>
               <motion.button
                 type="button"
                 className={`wishlist-pill-btn ${isFavorited ? 'active' : ''}`}
-                style={{ width: '46px', height: '46px', top: '24px', right: '24px' }}
+                style={{ width: '46px', height: '46px', top: '24px', right: '24px', zIndex: 10 }}
                 onClick={() => toggleWishlist(product)}
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
               >
                 <Heart size={22} fill={isFavorited ? 'var(--strawberry)' : 'none'} />
               </motion.button>
-              <motion.img
-                src={product.image}
+              
+              <Product3DRotator
+                src={resolveProductImage(product)}
                 alt={product.name}
-                className="product-gallery-img"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.4 }}
-                onError={(e) => {
-                  e.target.src = 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80';
-                }}
+                flavor={product.flavour || product.name}
+                size="hero"
+                maxTilt={22}
+                showShadow={true}
+                showGlow={true}
+                showSheen={true}
+                fallbackSrc="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80"
               />
             </div>
           </ScrollReveal>
