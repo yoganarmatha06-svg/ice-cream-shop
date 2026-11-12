@@ -3,18 +3,39 @@ import { adminAuthAPI, userAuthAPI } from '../services/api';
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('scoop_dreams_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+// 7 Days Session Expiration Constant (7 days in milliseconds)
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-  const [token, setToken] = useState(() => localStorage.getItem('scoop_dreams_token') || null);
-  const [role, setRole] = useState(() => localStorage.getItem('scoop_dreams_role') || null);
+const getInitialAuthState = () => {
+  try {
+    const loginTime = localStorage.getItem('scoop_dreams_login_time');
+    // If login time exists and is older than 7 days, expire the session
+    if (loginTime && Date.now() - Number(loginTime) > SEVEN_DAYS_MS) {
+      localStorage.removeItem('scoop_dreams_user');
+      localStorage.removeItem('scoop_dreams_token');
+      localStorage.removeItem('scoop_dreams_role');
+      localStorage.removeItem('scoop_dreams_login_time');
+      return { user: null, token: null, role: null };
+    }
+
+    const savedUser = localStorage.getItem('scoop_dreams_user');
+    const savedToken = localStorage.getItem('scoop_dreams_token');
+    const savedRole = localStorage.getItem('scoop_dreams_role');
+    return {
+      user: savedUser ? JSON.parse(savedUser) : null,
+      token: savedToken || null,
+      role: savedRole || null,
+    };
+  } catch {
+    return { user: null, token: null, role: null };
+  }
+};
+
+export const AuthProvider = ({ children }) => {
+  const initial = getInitialAuthState();
+  const [user, setUser] = useState(initial.user);
+  const [token, setToken] = useState(initial.token);
+  const [role, setRole] = useState(initial.role);
   const [loading, setLoading] = useState(true);
 
   // Auto-restore session from backend on mount or token change
@@ -22,6 +43,16 @@ export const AuthProvider = ({ children }) => {
     const fetchProfile = async () => {
       const storedToken = localStorage.getItem('scoop_dreams_token');
       const storedRole = localStorage.getItem('scoop_dreams_role');
+      const storedUser = localStorage.getItem('scoop_dreams_user');
+      const loginTime = localStorage.getItem('scoop_dreams_login_time');
+
+      // Check if 7 days have passed since login
+      if (loginTime && Date.now() - Number(loginTime) > SEVEN_DAYS_MS) {
+        console.warn('Session has reached 7-day expiration limit.');
+        logout();
+        setLoading(false);
+        return;
+      }
 
       if (storedToken) {
         try {
@@ -37,10 +68,23 @@ export const AuthProvider = ({ children }) => {
             setRole(res.data.role);
             localStorage.setItem('scoop_dreams_user', JSON.stringify(res.data));
             localStorage.setItem('scoop_dreams_role', res.data.role);
+            if (!loginTime) {
+              localStorage.setItem('scoop_dreams_login_time', Date.now().toString());
+            }
           }
         } catch (err) {
-          console.warn('Session expired or invalid token:', err.message);
-          logout();
+          console.warn('Session profile check notice:', err.message);
+          // Only log out if the backend explicitly rejected the token with 401 Unauthorized
+          if (err?.status === 401 || err?.response?.status === 401) {
+            logout();
+          } else if (storedUser) {
+            // Maintain the logged-in session from localStorage across refreshes/network lags
+            try {
+              const parsed = JSON.parse(storedUser);
+              setUser(parsed);
+              setRole(storedRole || parsed.role || 'user');
+            } catch {}
+          }
         }
       }
       setLoading(false);
@@ -61,6 +105,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('scoop_dreams_user', JSON.stringify(adminData));
       localStorage.setItem('scoop_dreams_role', 'admin');
       localStorage.setItem('scoop_dreams_token', authToken);
+      localStorage.setItem('scoop_dreams_login_time', Date.now().toString());
       return adminData;
     }
     throw new Error(res?.message || 'Admin authentication failed');
@@ -78,6 +123,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('scoop_dreams_user', JSON.stringify(userData));
       localStorage.setItem('scoop_dreams_role', 'user');
       localStorage.setItem('scoop_dreams_token', authToken);
+      localStorage.setItem('scoop_dreams_login_time', Date.now().toString());
       return userData;
     }
     throw new Error(res?.message || 'Login failed');
@@ -95,6 +141,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('scoop_dreams_user', JSON.stringify(newUser));
       localStorage.setItem('scoop_dreams_role', 'user');
       localStorage.setItem('scoop_dreams_token', authToken);
+      localStorage.setItem('scoop_dreams_login_time', Date.now().toString());
       return newUser;
     }
     throw new Error(res?.message || 'Registration failed');
@@ -112,6 +159,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('scoop_dreams_user');
     localStorage.removeItem('scoop_dreams_token');
     localStorage.removeItem('scoop_dreams_role');
+    localStorage.removeItem('scoop_dreams_login_time');
   };
 
   const updateProfile = async (formData) => {

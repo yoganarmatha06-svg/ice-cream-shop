@@ -2,22 +2,22 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Admin from '../models/Admin.js';
 
-// Helper to generate JWT token
+// Helper to generate JWT token (Valid for 7 Days)
 export const generateToken = (id, role = 'user') => {
   return jwt.sign(
     { id, role },
     process.env.JWT_SECRET || 'scoop_dreams_artisan_secret_key_2026_super_secure',
-    { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 };
 
-// Helper to set HTTP-only cookie
+// Helper to set HTTP-only cookie (7 Days Session)
 export const setTokenCookie = (res, token) => {
   res.cookie('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (604,800,000 ms)
   });
 };
 
