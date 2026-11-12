@@ -279,7 +279,7 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td>
-                        <strong style={{ color: 'var(--chocolate-dark)' }}>${Number(item.price).toFixed(2)}</strong>
+                        <strong style={{ color: 'var(--chocolate-dark)' }}>₹{Number(item.price).toFixed(2)}</strong>
                       </td>
                       <td>
                         <span className={`status-pill ${item.status === 'Available' ? 'status-available' : 'status-unavailable'}`}>

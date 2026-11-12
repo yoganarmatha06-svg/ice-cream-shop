@@ -102,7 +102,7 @@ const Cart = () => {
               <div className="summary-row">
                 <span>Subtotal</span>
                 <span style={{ fontWeight: 700, color: 'var(--chocolate-dark)' }}>
-                  ${cartSubtotal.toFixed(2)}
+                  ₹{cartSubtotal.toFixed(2)}
                 </span>
               </div>
 
@@ -110,23 +110,23 @@ const Cart = () => {
               {discountAmount > 0 && (
                 <div className="summary-row" style={{ color: '#15803d' }}>
                   <span>Coupon ({appliedCoupon?.code})</span>
-                  <span style={{ fontWeight: 700 }}>-${discountAmount.toFixed(2)}</span>
+                  <span style={{ fontWeight: 700 }}>-₹{discountAmount.toFixed(2)}</span>
                 </div>
               )}
 
               {/* Shipping */}
               <div className="summary-row">
                 <span>Sub-Zero Insulated Shipping</span>
-                <span>{shippingFee === 0 ? <strong style={{ color: '#15803d' }}>FREE</strong> : `$${shippingFee.toFixed(2)}`}</span>
+                <span>{shippingFee === 0 ? <strong style={{ color: '#15803d' }}>FREE</strong> : `₹${shippingFee.toFixed(2)}`}</span>
               </div>
 
               {shippingFee > 0 && (
                 <div style={{ fontSize: '0.8rem', color: 'var(--strawberry)', marginBottom: '14px' }}>
-                  Add ${(35 - cartSubtotal).toFixed(2)} more to qualify for <strong>FREE DELIVERY</strong>!
+                  Add ₹{(35 - cartSubtotal).toFixed(2)} more to qualify for <strong>FREE DELIVERY</strong>!
                 </div>
               )}
 
-              {/* Coupon Code Section (Available only for orders above $200) */}
+              {/* Coupon Code Section (Available only for orders above ₹200) */}
               <div style={{ margin: '20px 0', borderTop: '1px dashed var(--border-soft)', paddingTop: '16px' }}>
                 {cartSubtotal >= 200 ? (
                   appliedCoupon ? (
@@ -157,7 +157,7 @@ const Cart = () => {
                   ) : (
                     <div>
                       <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#15803d', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Tag size={14} /> Coupon Code (Unlocked for orders above $200)
+                        <Tag size={14} /> Coupon Code (Unlocked for orders above ₹200)
                       </div>
                       <form onSubmit={handleApplyCoupon}>
                         <div className="coupon-box">
@@ -197,7 +197,7 @@ const Cart = () => {
                   >
                     <Tag size={16} color="#d97706" style={{ flexShrink: 0 }} />
                     <span>
-                      Coupon code applies on orders <strong>above $200</strong>. Add <strong>${(200 - cartSubtotal).toFixed(2)}</strong> more to apply coupons!
+                      Coupon code applies on orders <strong>above ₹200</strong>. Add <strong>₹{(200 - cartSubtotal).toFixed(2)}</strong> more to apply coupons!
                     </span>
                   </div>
                 )}
@@ -206,7 +206,7 @@ const Cart = () => {
               {/* Total */}
               <div className="summary-row total">
                 <span>Total</span>
-                <span>${finalTotal.toFixed(2)}</span>
+                <span>₹{finalTotal.toFixed(2)}</span>
               </div>
 
               <motion.button

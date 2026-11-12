@@ -238,7 +238,7 @@ const Checkout = () => {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.15rem', fontWeight: 800, color: 'var(--chocolate-dark)' }}>
                 <span>Total Amount:</span>
-                <span style={{ color: 'var(--strawberry)' }}>${placedOrder.totalAmount?.toFixed(2)}</span>
+                <span style={{ color: 'var(--strawberry)' }}>₹{placedOrder.totalAmount?.toFixed(2)}</span>
               </div>
             </div>
 
@@ -597,7 +597,7 @@ const Checkout = () => {
                         </div>
                       </div>
                       <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--chocolate-dark)' }}>
-                        ${((item.price || 0) * item.quantity).toFixed(2)}
+                        ₹{((item.price || 0) * item.quantity).toFixed(2)}
                       </div>
                     </div>
                   ))}
@@ -605,24 +605,24 @@ const Checkout = () => {
 
                 <div className="summary-row">
                   <span>Subtotal</span>
-                  <span>${cartSubtotal.toFixed(2)}</span>
+                  <span>₹{cartSubtotal.toFixed(2)}</span>
                 </div>
 
                 {discountAmount > 0 && (
                   <div className="summary-row" style={{ color: '#15803d' }}>
                     <span>Discount ({appliedCoupon?.code})</span>
-                    <span>-${discountAmount.toFixed(2)}</span>
+                    <span>-₹{discountAmount.toFixed(2)}</span>
                   </div>
                 )}
 
                 <div className="summary-row">
                   <span>Sub-Zero Cryo Delivery</span>
-                  <span>{shippingFee === 0 ? <strong style={{ color: '#15803d' }}>FREE</strong> : `$${shippingFee.toFixed(2)}`}</span>
+                  <span>{shippingFee === 0 ? <strong style={{ color: '#15803d' }}>FREE</strong> : `₹${shippingFee.toFixed(2)}`}</span>
                 </div>
 
                 <div className="summary-row total">
                   <span>Total Amount</span>
-                  <span style={{ color: 'var(--strawberry)' }}>${finalTotal.toFixed(2)}</span>
+                  <span style={{ color: 'var(--strawberry)' }}>₹{finalTotal.toFixed(2)}</span>
                 </div>
 
                 {/* Main Action Button: Proceed to Pay */}
@@ -650,7 +650,7 @@ const Checkout = () => {
                   ) : (
                     <>
                       <Lock size={18} />
-                      <span>Proceed to Pay • ${finalTotal.toFixed(2)}</span>
+                      <span>Proceed to Pay • ₹{finalTotal.toFixed(2)}</span>
                       <ArrowRight size={18} />
                     </>
                   )}

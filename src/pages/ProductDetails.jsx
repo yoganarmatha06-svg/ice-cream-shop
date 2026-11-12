@@ -210,11 +210,11 @@ const ProductDetails = () => {
               {/* Price */}
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px', marginBottom: '20px' }}>
                 <span style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--chocolate-dark)' }}>
-                  ${unitPrice.toFixed(2)}
+                  ₹{unitPrice.toFixed(2)}
                 </span>
                 {product.discountPrice > 0 && (
                   <span style={{ fontSize: '1.3rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                    ${product.price.toFixed(2)}
+                    ₹{product.price.toFixed(2)}
                   </span>
                 )}
               </div>
@@ -280,7 +280,7 @@ const ProductDetails = () => {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <ShoppingBag size={20} /> Add To Bag (${(unitPrice * quantity).toFixed(2)})
+                  <ShoppingBag size={20} /> Add To Bag (₹{(unitPrice * quantity).toFixed(2)})
                 </motion.button>
               </div>
 

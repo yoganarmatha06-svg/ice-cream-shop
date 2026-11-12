@@ -155,10 +155,10 @@ const ProductCard = ({ product, customVariants = cardItemVariants }) => {
           <div className="product-card-footer">
             <div className="product-card-price">
               <span className="current-price">
-                ${(product.discountPrice > 0 ? product.discountPrice : product.price).toFixed(2)}
+                ₹{(product.discountPrice > 0 ? product.discountPrice : product.price).toFixed(2)}
               </span>
               {product.discountPrice > 0 && (
-                <span className="original-price">${product.price.toFixed(2)}</span>
+                <span className="original-price">₹{product.price.toFixed(2)}</span>
               )}
             </div>
 
@@ -225,10 +225,10 @@ const ProductCard = ({ product, customVariants = cardItemVariants }) => {
                 </div>
 
                 <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#2d1810', marginBottom: '14px' }}>
-                  ${(product.discountPrice > 0 ? product.discountPrice : product.price).toFixed(2)}
+                  ₹{(product.discountPrice > 0 ? product.discountPrice : product.price).toFixed(2)}
                   {product.discountPrice > 0 && (
                     <span style={{ fontSize: '1rem', color: '#9c8e8c', textDecoration: 'line-through', marginLeft: '8px' }}>
-                      ${product.price.toFixed(2)}
+                      ₹{product.price.toFixed(2)}
                     </span>
                   )}
                 </div>

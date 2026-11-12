@@ -58,9 +58,10 @@ export const createOrder = async (req, res) => {
     const order = new Order({
       user: orderUserId,
       products: products.map((item) => ({
-        product: item.product._id || item.product,
-        name: item.product.name || item.name,
-        image: item.product.image || item.image,
+        product: item.product?._id || item.product,
+        name: item.product?.name || item.name,
+        image: item.product?.image || item.image,
+        flavour: item.product?.flavour || item.flavour || '',
         quantity: item.quantity,
         price: item.price,
         selectedSize: item.selectedSize || 'Regular Scoop (120ml)',

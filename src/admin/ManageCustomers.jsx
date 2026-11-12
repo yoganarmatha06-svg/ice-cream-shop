@@ -16,7 +16,9 @@ import {
   Clock,
   Sparkles,
   ExternalLink,
-  DollarSign,
+  IndianRupee,
+  IceCream,
+  Tag,
   Package,
 } from 'lucide-react';
 import { customersAPI } from '../services/api';
@@ -134,13 +136,13 @@ const ManageCustomers = () => {
 
         <motion.div className="admin-stat-card" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <div className="stat-icon-wrapper stat-icon-green">
-            <DollarSign size={26} />
+            <IndianRupee size={26} />
           </div>
           <div className="stat-info">
-            <h3>${totalRevenueSum.toFixed(2)}</h3>
+            <h3>₹{totalRevenueSum.toFixed(2)}</h3>
             <p>Lifetime Customer Sales</p>
             <div className="stat-subtext" style={{ color: '#15803d', fontWeight: 600 }}>
-              Avg ${(totalCustomers > 0 ? totalRevenueSum / totalCustomers : 0).toFixed(2)} / Customer
+              Avg ₹{(totalCustomers > 0 ? totalRevenueSum / totalCustomers : 0).toFixed(2)} / Customer
             </div>
           </div>
         </motion.div>
@@ -152,7 +154,7 @@ const ManageCustomers = () => {
           <Search size={18} className="search-icon" />
           <input
             type="text"
-            placeholder="Search by customer name, email, phone number, city, or pincode..."
+            placeholder="Search by customer name, email, phone, city, product, or flavor..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="admin-search-input"
@@ -234,6 +236,7 @@ const ManageCustomers = () => {
                   <th>Customer Name</th>
                   <th>Contact Info</th>
                   <th>Complete Address</th>
+                  <th>Purchased Products & Flavors</th>
                   <th>Total Orders</th>
                   <th>Lifetime Spend</th>
                   <th style={{ textAlign: 'center' }}>Order History</th>
@@ -320,13 +323,110 @@ const ManageCustomers = () => {
                     </td>
 
                     {/* Address */}
-                    <td style={{ maxWidth: '280px' }}>
+                    <td style={{ maxWidth: '240px' }}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
                         <MapPin size={15} color="#d97706" style={{ flexShrink: 0, marginTop: '3px' }} />
                         <div style={{ fontSize: '0.86rem', color: 'var(--chocolate-dark)', lineHeight: '1.4' }}>
                           {cust.fullAddressString}
                         </div>
                       </div>
+                    </td>
+
+                    {/* Purchased Products & Flavors */}
+                    <td style={{ minWidth: '220px', maxWidth: '300px' }}>
+                      {cust.purchasedProducts && cust.purchasedProducts.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {/* Products Mini Cards */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                            {cust.purchasedProducts.slice(0, 2).map((prod, pIdx) => (
+                              <div
+                                key={pIdx}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  background: '#fffdfa',
+                                  padding: '5px 8px',
+                                  borderRadius: '10px',
+                                  border: '1px solid #fce7ec',
+                                }}
+                              >
+                                {prod.image ? (
+                                  <img
+                                    src={prod.image}
+                                    alt={prod.name}
+                                    style={{ width: '28px', height: '28px', borderRadius: '8px', objectFit: 'cover' }}
+                                  />
+                                ) : (
+                                  <span style={{ fontSize: '1rem' }}>🍨</span>
+                                )}
+                                <div style={{ overflow: 'hidden', flex: 1 }}>
+                                  <div
+                                    style={{
+                                      fontSize: '0.82rem',
+                                      fontWeight: 700,
+                                      color: 'var(--chocolate-dark)',
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                    }}
+                                    title={prod.name}
+                                  >
+                                    {prod.name}
+                                  </div>
+                                  <div style={{ fontSize: '0.72rem', color: '#be123c', fontWeight: 600 }}>
+                                    Flavor: {prod.flavor} • {prod.totalQuantity} {prod.totalQuantity === 1 ? 'scoop' : 'scoops'}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+
+                            {cust.purchasedProducts.length > 2 && (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedCustomer(cust)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  padding: '2px 4px',
+                                  color: '#be123c',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  textAlign: 'left',
+                                }}
+                              >
+                                +{cust.purchasedProducts.length - 2} more items ordered...
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Flavor Tags */}
+                          {cust.purchasedFlavors && cust.purchasedFlavors.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                              {cust.purchasedFlavors.slice(0, 3).map((flav, fIdx) => (
+                                <span
+                                  key={fIdx}
+                                  className="badge badge-pink"
+                                  style={{ fontSize: '0.68rem', padding: '2px 7px' }}
+                                  title={`${flav.name}: ${flav.count} scoops`}
+                                >
+                                  🍦 {flav.name}
+                                </span>
+                              ))}
+                              {cust.purchasedFlavors.length > 3 && (
+                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', alignSelf: 'center' }}>
+                                  +{cust.purchasedFlavors.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '0.82rem', color: '#9c8e8c', fontStyle: 'italic' }}>
+                          No purchases yet
+                        </span>
+                      )}
                     </td>
 
                     {/* Total Orders */}
@@ -353,7 +453,7 @@ const ManageCustomers = () => {
                     {/* Lifetime Spend */}
                     <td>
                       <div style={{ fontWeight: 800, color: '#be123c', fontSize: '1rem' }}>
-                        ${cust.totalSpent.toFixed(2)}
+                        ₹{cust.totalSpent.toFixed(2)}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                         {cust.lastOrderDate ? `Last: ${new Date(cust.lastOrderDate).toLocaleDateString()}` : 'No orders yet'}
@@ -470,10 +570,98 @@ const ManageCustomers = () => {
                 <div>
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#be123c', textTransform: 'uppercase' }}>Total Spent</div>
                   <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#be123c', marginTop: '2px' }}>
-                    ${selectedCustomer.totalSpent.toFixed(2)}
+                    ₹{selectedCustomer.totalSpent.toFixed(2)}
                   </div>
                 </div>
               </div>
+
+              {/* Customer Purchased Flavors & Products Portfolio */}
+              {((selectedCustomer.purchasedFlavors && selectedCustomer.purchasedFlavors.length > 0) ||
+                (selectedCustomer.purchasedProducts && selectedCustomer.purchasedProducts.length > 0)) && (
+                <div
+                  style={{
+                    background: '#fffdfa',
+                    border: '1px solid #fce7ec',
+                    borderRadius: '18px',
+                    padding: '16px 20px',
+                    marginBottom: '24px',
+                  }}
+                >
+                  {/* Flavors Section */}
+                  {selectedCustomer.purchasedFlavors && selectedCustomer.purchasedFlavors.length > 0 && (
+                    <div style={{ marginBottom: selectedCustomer.purchasedProducts?.length > 0 ? '16px' : '0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                        <Sparkles size={16} color="#be123c" />
+                        <strong style={{ fontSize: '0.88rem', color: 'var(--chocolate-dark)' }}>
+                          Customer Flavor Preferences:
+                        </strong>
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {selectedCustomer.purchasedFlavors.map((fl, fIdx) => (
+                          <span
+                            key={fIdx}
+                            className="badge badge-pink"
+                            style={{ fontSize: '0.8rem', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                          >
+                            <span>🍨</span>
+                            <strong>{fl.name}</strong>
+                            <span style={{ opacity: 0.85 }}>({fl.count} {fl.count === 1 ? 'scoop' : 'scoops'})</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Products Section */}
+                  {selectedCustomer.purchasedProducts && selectedCustomer.purchasedProducts.length > 0 && (
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                        <IceCream size={16} color="#be123c" />
+                        <strong style={{ fontSize: '0.88rem', color: 'var(--chocolate-dark)' }}>
+                          Products Ordered by Customer ({selectedCustomer.purchasedProducts.length} varieties):
+                        </strong>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                        {selectedCustomer.purchasedProducts.map((p, pIdx) => (
+                          <div
+                            key={pIdx}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              padding: '8px 12px',
+                              background: '#faf6f0',
+                              borderRadius: '12px',
+                              border: '1px solid #ebd9d7',
+                            }}
+                          >
+                            {p.image ? (
+                              <img
+                                src={p.image}
+                                alt={p.name}
+                                style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <span style={{ fontSize: '1.4rem' }}>🍨</span>
+                            )}
+                            <div style={{ overflow: 'hidden', flex: 1 }}>
+                              <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--chocolate-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {p.name}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#be123c', fontWeight: 600 }}>
+                                Flavor: {p.flavor}
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                {p.totalQuantity} scoops across {p.orderCount} {p.orderCount === 1 ? 'order' : 'orders'}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Order History Timeline / List */}
               <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.3rem', color: 'var(--chocolate-dark)', marginBottom: '14px' }}>
@@ -522,39 +710,56 @@ const ManageCustomers = () => {
                       {/* Items Ordered List */}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '14px' }}>
                         {order.products && order.products.map((item, pIdx) => (
-                          <div key={pIdx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div
+                            key={pIdx}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '12px',
+                              padding: '10px 14px',
+                              background: '#faf6f0',
+                              borderRadius: '12px',
+                              border: '1px solid #ebd9d7',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                               {item.image && (
                                 <img
                                   src={item.image}
                                   alt={item.name}
-                                  style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover' }}
+                                  style={{ width: '42px', height: '42px', borderRadius: '10px', objectFit: 'cover' }}
                                 />
                               )}
                               <div>
                                 <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--chocolate-dark)' }}>
                                   {item.name}
                                 </div>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                                  {item.selectedSize} • Qty: {item.quantity}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '3px' }}>
+                                  <span className="badge badge-pink" style={{ fontSize: '0.72rem', padding: '2px 8px' }}>
+                                    🍨 Flavor: {item.flavour || item.flavor || 'Artisan'}
+                                  </span>
+                                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                    {item.selectedSize} • Qty: {item.quantity}
+                                  </span>
                                 </div>
                               </div>
                             </div>
 
-                            <div style={{ fontWeight: 700, color: 'var(--chocolate-dark)', fontSize: '0.95rem' }}>
-                              ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+                            <div style={{ fontWeight: 800, color: 'var(--chocolate-dark)', fontSize: '0.98rem' }}>
+                              ₹{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
                             </div>
                           </div>
                         ))}
                       </div>
 
                       {/* Order Footer & Delivery Snapshot */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#faf6f0', padding: '10px 14px', borderRadius: '12px', fontSize: '0.85rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fdf2f4', padding: '12px 16px', borderRadius: '12px', fontSize: '0.85rem' }}>
                         <div style={{ color: 'var(--text-secondary)' }}>
                           <strong>Delivered To:</strong> {order.deliveryAddress?.street}, {order.deliveryAddress?.city} ({order.deliveryAddress?.pincode})
                         </div>
                         <div style={{ fontWeight: 800, color: '#be123c', fontSize: '1.05rem' }}>
-                          Total: ${Number(order.totalAmount).toFixed(2)}
+                          Total: ₹{Number(order.totalAmount).toFixed(2)}
                         </div>
                       </div>
                     </div>
@@ -582,3 +787,4 @@ const ManageCustomers = () => {
 };
 
 export default ManageCustomers;
+

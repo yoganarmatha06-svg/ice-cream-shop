@@ -403,7 +403,7 @@ const ManageIceCreams = () => {
 
                     <td>
                       <strong style={{ fontSize: '1.05rem', color: 'var(--chocolate-dark)' }}>
-                        ${Number(item.price).toFixed(2)}
+                        ₹{Number(item.price).toFixed(2)}
                       </strong>
                     </td>
 
@@ -470,7 +470,7 @@ const ManageIceCreams = () => {
                   </span>
                 </div>
                 <div className="admin-card-price-badge">
-                  ${Number(item.price).toFixed(2)}
+                  ₹{Number(item.price).toFixed(2)}
                 </div>
               </div>
 
@@ -572,10 +572,10 @@ const ManageIceCreams = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   {/* Price */}
                   <div className="form-group-item">
-                    <label>Price ($ USD) *</label>
+                    <label>Price (₹ INR) *</label>
                     <div style={{ position: 'relative' }}>
                       <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 700 }}>
-                        $
+                        ₹
                       </span>
                       <input
                         type="number"

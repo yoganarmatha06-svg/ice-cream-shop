@@ -14,6 +14,10 @@ const orderItemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  flavour: {
+    type: String,
+    default: 'Artisan',
+  },
   quantity: {
     type: Number,
     required: true,

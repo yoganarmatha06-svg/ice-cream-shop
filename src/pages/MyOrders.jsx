@@ -134,7 +134,7 @@ const MyOrders = () => {
                     {order.orderStatus}
                   </span>
                   <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--chocolate-dark)', marginTop: '6px' }}>
-                    ${order.totalAmount?.toFixed(2)}
+                    ₹{order.totalAmount?.toFixed(2)}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                     Payment: {order.paymentMethod}
@@ -203,7 +203,7 @@ const MyOrders = () => {
                         {item.name}
                       </div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        Qty: {item.quantity} • ${item.price?.toFixed(2)}
+                        Qty: {item.quantity} • ₹{item.price?.toFixed(2)}
                       </div>
                     </div>
                   </div>

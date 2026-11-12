@@ -153,7 +153,28 @@ export const getDashboardStats = async (req, res) => {
   }
 };
 
-// @desc    Get All Customers (Registered + Order Customers with Full Details & Order History)
+// Helper to extract or infer flavor name from product or order item
+const extractItemFlavor = (item) => {
+  if (item.flavour && item.flavour.trim()) return item.flavour.trim();
+  if (item.flavor && item.flavor.trim()) return item.flavor.trim();
+  if (item.product && item.product.flavour && item.product.flavour.trim()) return item.product.flavour.trim();
+  const name = (item.name || '').toLowerCase();
+  if (name.includes('vanilla')) return 'Bourbon Vanilla';
+  if (name.includes('choco') || name.includes('fudge') || name.includes('cacao') || name.includes('belgian')) return 'Belgian Chocolate';
+  if (name.includes('strawberr')) return 'Fresh Strawberry';
+  if (name.includes('mango') || name.includes('alphonso')) return 'Alphonso Mango';
+  if (name.includes('pistachio')) return 'Pistachio & Nuts';
+  if (name.includes('butterscotch') || name.includes('caramel')) return 'Butterscotch';
+  if (name.includes('cookie')) return 'Cookies & Cream';
+  if (name.includes('coffee') || name.includes('mocha') || name.includes('espresso')) return 'Coffee & Mocha';
+  if (name.includes('cotton candy')) return 'Cotton Candy';
+  if (name.includes('blueberr') || name.includes('cheesecake')) return 'Blueberry & Cheesecake';
+  if (name.includes('mint')) return 'Mint Choco Chip';
+  if (name.includes('fruit') || name.includes('berry') || name.includes('sorbet')) return 'Fruit Flavours';
+  return 'Artisan Ice Cream';
+};
+
+// @desc    Get All Customers (Registered + Order Customers with Full Details, Products & Flavors)
 // @route   GET /api/admin/customers
 export const getCustomers = async (req, res) => {
   try {
@@ -162,8 +183,11 @@ export const getCustomers = async (req, res) => {
     // 1. Fetch registered users
     const users = await User.find({ role: 'user' }).select('-password').lean();
 
-    // 2. Fetch all orders
-    const orders = await Order.find().sort({ createdAt: -1 }).lean();
+    // 2. Fetch all orders with product details populated
+    const orders = await Order.find()
+      .populate('products.product', 'name flavour category image')
+      .sort({ createdAt: -1 })
+      .lean();
 
     // 3. Fetch all saved addresses
     const addresses = await Address.find().lean();
@@ -189,10 +213,16 @@ export const getCustomers = async (req, res) => {
         fullAddressString: '',
         totalOrders: 0,
         totalSpent: 0,
+        totalScoops: 0,
+        purchasedProducts: [],
+        purchasedFlavors: [],
+        topFlavors: [],
         orderHistory: [],
         customerType: 'Registered User',
         createdAt: u.createdAt,
         lastOrderDate: null,
+        _productMap: new Map(),
+        _flavorMap: new Map(),
       });
     });
 
@@ -212,7 +242,7 @@ export const getCustomers = async (req, res) => {
       }
     });
 
-    // Process all orders to aggregate total orders, order history & addresses
+    // Process all orders to aggregate total orders, products, flavors & addresses
     orders.forEach((ord) => {
       const userRefId = ord.user ? String(ord.user) : null;
       let email = (ord.deliveryAddress?.email || '').toLowerCase().trim();
@@ -249,10 +279,16 @@ export const getCustomers = async (req, res) => {
           fullAddressString: '',
           totalOrders: 0,
           totalSpent: 0,
+          totalScoops: 0,
+          purchasedProducts: [],
+          purchasedFlavors: [],
+          topFlavors: [],
           orderHistory: [],
           customerType: userRefId ? 'Registered User' : 'Order Customer',
           createdAt: ord.createdAt,
           lastOrderDate: null,
+          _productMap: new Map(),
+          _flavorMap: new Map(),
         };
         customerMap.set(email, cust);
       }
@@ -278,6 +314,49 @@ export const getCustomers = async (req, res) => {
         cust.lastOrderDate = ord.createdAt;
       }
 
+      // Process order products & flavors
+      const enrichedProducts = (ord.products || []).map((item) => {
+        const flavorName = extractItemFlavor(item);
+        const pName = item.name || item.product?.name || 'Artisan Ice Cream';
+        const pImage = item.image || item.product?.image || '';
+        const qty = Number(item.quantity) || 1;
+
+        cust.totalScoops += qty;
+
+        // Aggregate Product
+        if (cust._productMap.has(pName)) {
+          const existing = cust._productMap.get(pName);
+          existing.totalQuantity += qty;
+          existing.orderCount += 1;
+        } else {
+          cust._productMap.set(pName, {
+            name: pName,
+            image: pImage,
+            flavor: flavorName,
+            totalQuantity: qty,
+            orderCount: 1,
+            selectedSize: item.selectedSize || 'Regular Scoop (120ml)',
+          });
+        }
+
+        // Aggregate Flavor
+        if (cust._flavorMap.has(flavorName)) {
+          const fExisting = cust._flavorMap.get(flavorName);
+          fExisting.count += qty;
+        } else {
+          cust._flavorMap.set(flavorName, {
+            name: flavorName,
+            count: qty,
+          });
+        }
+
+        return {
+          ...item,
+          flavour: flavorName,
+          flavor: flavorName,
+        };
+      });
+
       // Add to Order History
       cust.orderHistory.push({
         _id: ord._id,
@@ -288,8 +367,8 @@ export const getCustomers = async (req, res) => {
         orderStatus: ord.orderStatus || 'Processing',
         paymentMethod: ord.paymentMethod || 'Cash on Delivery',
         paymentStatus: ord.paymentStatus || 'Pending',
-        productsCount: (ord.products || []).reduce((sum, p) => sum + (p.quantity || 1), 0),
-        products: ord.products || [],
+        productsCount: enrichedProducts.reduce((sum, p) => sum + (p.quantity || 1), 0),
+        products: enrichedProducts,
         deliveryAddress: ord.deliveryAddress || {},
         createdAt: ord.createdAt,
       });
@@ -306,24 +385,44 @@ export const getCustomers = async (req, res) => {
       // Sort order history for each customer newest first
       c.orderHistory.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+      // Extract products & flavors arrays
+      const purchasedProducts = Array.from(c._productMap.values()).sort(
+        (a, b) => b.totalQuantity - a.totalQuantity
+      );
+      const purchasedFlavors = Array.from(c._flavorMap.values()).sort((a, b) => b.count - a.count);
+      const topFlavors = purchasedFlavors.slice(0, 3).map((f) => f.name);
+
+      delete c._productMap;
+      delete c._flavorMap;
+
       return {
         ...c,
+        purchasedProducts,
+        purchasedFlavors,
+        topFlavors,
         totalSpent: Math.round(c.totalSpent * 100) / 100,
         fullAddressString: parts.length > 0 ? parts.join(', ') : 'No delivery address provided yet',
       };
     });
 
-    // Search filter
+    // Search filter (name, email, phone, address, product name, flavor)
     if (search.trim()) {
       const q = search.toLowerCase().trim();
-      customerList = customerList.filter(
-        (c) =>
+      customerList = customerList.filter((c) => {
+        const productMatch = (c.purchasedProducts || []).some(
+          (p) => p.name.toLowerCase().includes(q) || (p.flavor && p.flavor.toLowerCase().includes(q))
+        );
+        const flavorMatch = (c.purchasedFlavors || []).some((f) => f.name.toLowerCase().includes(q));
+        return (
           c.name.toLowerCase().includes(q) ||
           c.email.toLowerCase().includes(q) ||
           c.phone.toLowerCase().includes(q) ||
           (c.altPhone && c.altPhone.toLowerCase().includes(q)) ||
-          c.fullAddressString.toLowerCase().includes(q)
-      );
+          c.fullAddressString.toLowerCase().includes(q) ||
+          productMatch ||
+          flavorMatch
+        );
+      });
     }
 
     // Sort order
@@ -361,7 +460,40 @@ export const getCustomerById = async (req, res) => {
       const order = await Order.findById(orderId).lean();
       if (!order) return res.status(404).json({ success: false, message: 'Customer not found' });
       
-      const orders = await Order.find({ 'deliveryAddress.email': order.deliveryAddress?.email }).sort({ createdAt: -1 }).lean();
+      const orders = await Order.find({ 'deliveryAddress.email': order.deliveryAddress?.email })
+        .populate('products.product', 'name flavour category image')
+        .sort({ createdAt: -1 })
+        .lean();
+
+      // Aggregate products & flavors
+      const prodMap = new Map();
+      const flavMap = new Map();
+      orders.forEach((ord) => {
+        (ord.products || []).forEach((item) => {
+          const flavorName = extractItemFlavor(item);
+          item.flavour = flavorName;
+          item.flavor = flavorName;
+          const pName = item.name || item.product?.name || 'Artisan Ice Cream';
+          const qty = Number(item.quantity) || 1;
+          if (prodMap.has(pName)) {
+            prodMap.get(pName).totalQuantity += qty;
+          } else {
+            prodMap.set(pName, {
+              name: pName,
+              image: item.image || item.product?.image || '',
+              flavor: flavorName,
+              totalQuantity: qty,
+              orderCount: 1,
+            });
+          }
+          if (flavMap.has(flavorName)) {
+            flavMap.get(flavorName).count += qty;
+          } else {
+            flavMap.set(flavorName, { name: flavorName, count: qty });
+          }
+        });
+      });
+
       return res.json({
         success: true,
         data: {
@@ -378,6 +510,8 @@ export const getCustomerById = async (req, res) => {
           },
           totalOrders: orders.length,
           totalSpent: orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0),
+          purchasedProducts: Array.from(prodMap.values()),
+          purchasedFlavors: Array.from(flavMap.values()),
           orderHistory: orders,
         },
       });
@@ -390,7 +524,38 @@ export const getCustomerById = async (req, res) => {
 
     const orders = await Order.find({
       $or: [{ user: user._id }, { 'deliveryAddress.email': user.email }],
-    }).sort({ createdAt: -1 }).lean();
+    })
+      .populate('products.product', 'name flavour category image')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const prodMap = new Map();
+    const flavMap = new Map();
+    orders.forEach((ord) => {
+      (ord.products || []).forEach((item) => {
+        const flavorName = extractItemFlavor(item);
+        item.flavour = flavorName;
+        item.flavor = flavorName;
+        const pName = item.name || item.product?.name || 'Artisan Ice Cream';
+        const qty = Number(item.quantity) || 1;
+        if (prodMap.has(pName)) {
+          prodMap.get(pName).totalQuantity += qty;
+        } else {
+          prodMap.set(pName, {
+            name: pName,
+            image: item.image || item.product?.image || '',
+            flavor: flavorName,
+            totalQuantity: qty,
+            orderCount: 1,
+          });
+        }
+        if (flavMap.has(flavorName)) {
+          flavMap.get(flavorName).count += qty;
+        } else {
+          flavMap.set(flavorName, { name: flavorName, count: qty });
+        }
+      });
+    });
 
     const address = await Address.findOne({ user: user._id }).lean();
 
@@ -404,6 +569,8 @@ export const getCustomerById = async (req, res) => {
         address: address || orders[0]?.deliveryAddress || {},
         totalOrders: orders.length,
         totalSpent: orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0),
+        purchasedProducts: Array.from(prodMap.values()),
+        purchasedFlavors: Array.from(flavMap.values()),
         orderHistory: orders,
       },
     });

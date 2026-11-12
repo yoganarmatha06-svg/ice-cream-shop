@@ -27,7 +27,7 @@ const CartItem = ({ item }) => {
         </Link>
         <span className="cart-item-size-badge">{item.selectedSize || 'Regular Scoop (120ml)'}</span>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-          ${unitPrice.toFixed(2)} each
+          ₹{unitPrice.toFixed(2)} each
         </div>
       </div>
 
@@ -53,7 +53,7 @@ const CartItem = ({ item }) => {
       </div>
 
       {/* Subtotal */}
-      <div className="cart-item-price">${itemTotal.toFixed(2)}</div>
+      <div className="cart-item-price">₹{itemTotal.toFixed(2)}</div>
 
       {/* Remove Button */}
       <button

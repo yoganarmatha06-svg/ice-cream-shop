@@ -157,7 +157,7 @@ const Shop = () => {
               <div className="filter-group">
                 <div className="filter-group-title">
                   <span>Max Price:</span>
-                  <span style={{ color: 'var(--strawberry)' }}>${maxPrice.toFixed(2)}</span>
+                  <span style={{ color: 'var(--strawberry)' }}>₹{maxPrice.toFixed(2)}</span>
                 </div>
                 <input
                   type="range"
@@ -169,8 +169,8 @@ const Shop = () => {
                   style={{ width: '100%', accentColor: 'var(--strawberry)' }}
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  <span>$4.00</span>
-                  <span>$10.00</span>
+                  <span>₹4.00</span>
+                  <span>₹10.00</span>
                 </div>
               </div>
 
@@ -264,7 +264,7 @@ const Shop = () => {
                 )}
                 {maxPrice < 10 && (
                   <span className="filter-pill">
-                    Max: ${maxPrice.toFixed(2)}
+                    Max: ₹{maxPrice.toFixed(2)}
                     <X size={14} className="filter-pill-remove" onClick={() => setMaxPrice(10)} />
                   </span>
                 )}

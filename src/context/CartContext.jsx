@@ -176,7 +176,7 @@ export const CartProvider = ({ children }) => {
     if (currentSubtotal < 200) {
       return {
         success: false,
-        message: 'Coupon codes are only applicable on orders above $200. Please add more items!',
+        message: 'Coupon codes are only applicable on orders above ₹200. Please add more items!',
       };
     }
 

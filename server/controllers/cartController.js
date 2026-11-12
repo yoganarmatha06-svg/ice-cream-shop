@@ -199,14 +199,14 @@ export const applyCoupon = async (req, res) => {
     if (subtotal < 200) {
       return res.status(400).json({
         success: false,
-        message: 'Coupon codes are only applicable on orders above $200. Please add more items to your bag!',
+        message: 'Coupon codes are only applicable on orders above ₹200. Please add more items to your bag!',
       });
     }
 
     if (coupon.minSpend && subtotal < coupon.minSpend) {
       return res.status(400).json({
         success: false,
-        message: `Minimum order of $${coupon.minSpend} required for this coupon`,
+        message: `Minimum order of ₹${coupon.minSpend} required for this coupon`,
       });
     }
 
@@ -228,7 +228,7 @@ export const applyCoupon = async (req, res) => {
         discountAmount: Math.round(discountAmount * 100) / 100,
         finalTotal: Math.round(finalTotal * 100) / 100,
       },
-      message: `Coupon ${coupon.code} applied! You save $${discountAmount.toFixed(2)}`,
+      message: `Coupon ${coupon.code} applied! You save ₹${discountAmount.toFixed(2)}`,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
