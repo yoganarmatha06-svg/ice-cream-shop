@@ -114,8 +114,15 @@ export const usersAPI = {
   deleteAddress: (id) => api.delete(`/users/addresses/${id}`),
 };
 
+export const customersAPI = {
+  getAll: (params) => api.get('/admin/customers', { params }),
+  getById: (id) => api.get(`/admin/customers/${id}`),
+};
+
 export const adminAPI = {
   getDashboard: () => api.get('/admin/dashboard'),
+  getCustomers: (params) => api.get('/admin/customers', { params }),
+  getCustomerById: (id) => api.get(`/admin/customers/${id}`),
   getReports: () => api.get('/admin/reports'),
   getCoupons: () => api.get('/admin/coupons'),
   createCoupon: (data) => api.post('/admin/coupons', data),

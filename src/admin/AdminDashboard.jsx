@@ -12,6 +12,7 @@ import {
   Layers,
   ChevronRight,
   RefreshCw,
+  Users,
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import Loader from '../components/Loader';
@@ -51,6 +52,8 @@ const AdminDashboard = () => {
 
   const totalVarieties = stats?.totalIceCreams || 0;
   const totalFlavors = stats?.totalFlavors || 0;
+  const totalCustomers = stats?.totalCustomers || 0;
+  const totalOrders = stats?.totalOrders || 0;
   const availableCount = stats?.availableIceCreams || 0;
   const unavailableCount = stats?.unavailableIceCreams || 0;
   const activeFlavors = stats?.activeFlavors || 0;
@@ -160,13 +163,32 @@ const AdminDashboard = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Total Customers */}
+        <motion.div
+          className="admin-stat-card"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <div className="stat-icon-wrapper stat-icon-blue">
+            <Users size={28} />
+          </div>
+          <div className="stat-info">
+            <h3>{totalCustomers}</h3>
+            <p>Total Customers</p>
+            <div className="stat-subtext" style={{ color: '#0284c7', fontWeight: 600 }}>
+              {totalOrders} Total Orders
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Quick Access to Both Management Modules */}
+      {/* Quick Access to Management Modules */}
       <div className="admin-quick-actions-banner">
         <div className="quick-action-text">
           <h3>Quick Management Access</h3>
-          <p>Choose an admin module to create, update, or organize your menu items.</p>
+          <p>Choose an admin module to manage your ice creams, flavors, or customer profiles.</p>
         </div>
         <div className="quick-actions-btns">
           <Link
@@ -182,6 +204,13 @@ const AdminDashboard = () => {
             style={{ padding: '12px 24px', fontSize: '0.92rem' }}
           >
             <Sparkles size={18} /> Manage Flavors <ArrowRight size={16} />
+          </Link>
+          <Link
+            to="/admin/customers"
+            className="btn-secondary"
+            style={{ padding: '12px 24px', fontSize: '0.92rem' }}
+          >
+            <Users size={18} /> Manage Customers <ArrowRight size={16} />
           </Link>
         </div>
       </div>

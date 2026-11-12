@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   IceCream,
   Sparkles,
+  Users,
   ExternalLink,
   LogOut,
   Menu,
@@ -153,6 +154,15 @@ const AdminLayout = () => {
           >
             <Sparkles size={20} />
             <span>Flavor Management</span>
+          </NavLink>
+
+          <NavLink
+            to="/admin/customers"
+            className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+            onClick={() => setSidebarOpen(false)}
+          >
+            <Users size={20} />
+            <span>Customer Management</span>
           </NavLink>
         </nav>
 

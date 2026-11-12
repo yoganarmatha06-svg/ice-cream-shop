@@ -26,11 +26,12 @@ import UserProfile from './pages/UserProfile';
 import MyOrders from './pages/MyOrders';
 import NotFound from './pages/NotFound';
 
-// Admin Portal Pages (Strictly Ice Cream Variety & Flavor Management)
+// Admin Portal Pages (Ice Creams, Flavors, Customers)
 import AdminLayout from './admin/AdminLayout';
 import AdminDashboard from './admin/AdminDashboard';
 import ManageIceCreams from './admin/ManageIceCreams';
 import ManageFlavors from './admin/ManageFlavors';
+import ManageCustomers from './admin/ManageCustomers';
 
 // Styles
 import './styles/global.css';
@@ -75,11 +76,12 @@ function App() {
               {/* Dedicated Admin Authentication Route */}
               <Route path="/admin/login" element={<AdminLogin />} />
 
-              {/* Admin Portal (Strictly Ice Cream Variety & Flavor Management) */}
+              {/* Admin Portal (Ice Creams, Flavors & Customer Management) */}
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="icecreams" element={<ManageIceCreams />} />
                 <Route path="flavors" element={<ManageFlavors />} />
+                <Route path="customers" element={<ManageCustomers />} />
                 <Route path="products" element={<ManageIceCreams />} />
                 <Route path="categories" element={<ManageFlavors />} />
               </Route>

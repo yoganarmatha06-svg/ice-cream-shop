@@ -3,6 +3,8 @@ import {
   adminLogin,
   getAdminProfile,
   getDashboardStats,
+  getCustomers,
+  getCustomerById,
 } from '../controllers/adminController.js';
 import { protect, adminOnly } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
@@ -15,6 +17,10 @@ router.get('/profile', protect, adminOnly, getAdminProfile);
 
 // Admin Dashboard stats (Protected)
 router.get('/dashboard', protect, adminOnly, getDashboardStats);
+
+// Customer Management Routes (Protected, Admin Only)
+router.get('/customers', protect, adminOnly, getCustomers);
+router.get('/customers/:id', protect, adminOnly, getCustomerById);
 
 // Image Upload Endpoint (Multer)
 router.post('/upload', protect, adminOnly, upload.single('image'), (req, res) => {
