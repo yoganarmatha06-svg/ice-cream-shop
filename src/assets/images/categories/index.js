@@ -29,12 +29,23 @@ export const categoryImages = {
 export const getCategoryImage = (category) => {
   if (!category) return vanillaImg;
 
-  // Try by exact slug
+  // 1. Direct valid image path (HTTP/HTTPS, Data URL, or server upload path)
+  if (
+    category.image &&
+    (category.image.startsWith('http://') ||
+      category.image.startsWith('https://') ||
+      category.image.startsWith('data:') ||
+      category.image.startsWith('/uploads'))
+  ) {
+    return category.image;
+  }
+
+  // 2. Try by exact slug in local presets
   if (category.slug && categoryImages[category.slug]) {
     return categoryImages[category.slug];
   }
 
-  // Normalized lookup by name
+  // 3. Normalized lookup by name in local presets
   const normalized = (category.slug || category.name || '')
     .toLowerCase()
     .trim()
@@ -45,7 +56,7 @@ export const getCategoryImage = (category) => {
     return categoryImages[normalized];
   }
 
-  // Substring match
+  // 4. Substring match
   const nameLower = (category.name || '').toLowerCase();
   for (const [key, img] of Object.entries(categoryImages)) {
     const cleanKey = key.replace(/-/g, ' ');
@@ -54,8 +65,8 @@ export const getCategoryImage = (category) => {
     }
   }
 
-  // Check if category has a valid local asset path
-  if (category.image && !category.image.startsWith('http')) {
+  // 5. Fallback to category.image if non-empty
+  if (category.image) {
     return category.image;
   }
 

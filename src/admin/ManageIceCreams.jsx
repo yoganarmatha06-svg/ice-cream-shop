@@ -22,7 +22,7 @@ import {
   Image as ImageIcon,
   RefreshCw,
 } from 'lucide-react';
-import { iceCreamsAPI, flavorsAPI, uploadAPI } from '../services/api';
+import { iceCreamsAPI, flavorsAPI, categoriesAPI, uploadAPI } from '../services/api';
 import Loader from '../components/Loader';
 
 const POPULAR_IMAGE_PRESETS = [
@@ -73,6 +73,7 @@ const cleanImageUrl = (raw) => {
 const ManageIceCreams = () => {
   const [iceCreams, setIceCreams] = useState([]);
   const [flavors, setFlavors] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Filters & Search
@@ -102,6 +103,8 @@ const ManageIceCreams = () => {
     price: '',
     image: '',
     flavor: '',
+    category: 'auto',
+    customCategory: '',
     status: 'Available',
   });
 
@@ -119,11 +122,11 @@ const ManageIceCreams = () => {
     }, 3500);
   };
 
-  // Fetch Ice Creams and Flavors
+  // Fetch Ice Creams, Flavors, and Website Categories
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [iceCreamRes, flavorRes] = await Promise.all([
+      const [iceCreamRes, flavorRes, categoryRes] = await Promise.all([
         iceCreamsAPI.getAll({
           search: searchQuery || undefined,
           flavor: selectedFlavor !== 'all' ? selectedFlavor : undefined,
@@ -131,10 +134,12 @@ const ManageIceCreams = () => {
           sort: sortBy,
         }),
         flavorsAPI.getAll(),
+        categoriesAPI.getAll(),
       ]);
 
       if (iceCreamRes.success) setIceCreams(iceCreamRes.data);
       if (flavorRes.success) setFlavors(flavorRes.data);
+      if (categoryRes.success) setCategories(categoryRes.data);
     } catch (err) {
       console.error('Failed to load ice cream varieties:', err);
       showToast(err.message || 'Failed to load varieties', 'error');
@@ -156,6 +161,8 @@ const ManageIceCreams = () => {
       price: '',
       image: '',
       flavor: '',
+      category: 'auto',
+      customCategory: '',
       status: 'Available',
     });
     setUploadedFileInfo(null);
@@ -173,6 +180,8 @@ const ManageIceCreams = () => {
       price: item.price !== undefined ? item.price : '',
       image: item.image || '',
       flavor: item.flavor?._id || item.flavor || '',
+      category: item.category?._id || item.category || 'auto',
+      customCategory: '',
       status: item.status || 'Available',
     });
     setUploadedFileInfo(null);
@@ -708,6 +717,56 @@ const ManageIceCreams = () => {
                       ))}
                     </select>
                   </div>
+                </div>
+
+                {/* Website Category (Adds to "Explore Artisanal Categories" on website) */}
+                <div className="form-group-item">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label>
+                      Website Artisanal Category{' '}
+                      <span style={{ fontWeight: 400, color: 'var(--strawberry)', fontSize: '0.8rem' }}>
+                        (Appears in "Explore Artisanal Categories" on Home)
+                      </span>
+                    </label>
+                  </div>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="modal-input"
+                    style={{ background: '#fff' }}
+                  >
+                    <option value="auto">
+                      ✨ Auto-Assign (Match Flavor or Variety Name)
+                    </option>
+                    <option value="new">
+                      ➕ Create New Category for "Explore Artisanal Categories"...
+                    </option>
+                    <optgroup label="Existing Website Categories">
+                      {categories.map((c) => (
+                        <option key={c._id} value={c._id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+
+                  {/* If "Create New Category" is chosen */}
+                  {formData.category === 'new' && (
+                    <div style={{ marginTop: '10px' }}>
+                      <input
+                        type="text"
+                        placeholder="Type new category name (e.g. Tender Coconut, Kulfi, Paan, Belgian Dark)..."
+                        value={formData.customCategory}
+                        onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
+                        className="modal-input"
+                        autoFocus
+                        style={{ border: '2px solid var(--strawberry)', background: '#fff9fa' }}
+                      />
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                        This new category card will be dynamically added to "Explore Artisanal Categories" on the website Home page.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Availability Status */}
