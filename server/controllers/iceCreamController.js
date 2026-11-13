@@ -65,28 +65,25 @@ export const createIceCream = async (req, res) => {
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: 'Ice cream name is required' });
     }
-    if (!description || !description.trim()) {
-      return res.status(400).json({ success: false, message: 'Description is required' });
-    }
     if (price === undefined || price === null || isNaN(price) || Number(price) < 0) {
       return res.status(400).json({ success: false, message: 'Valid price (greater than or equal to 0) is required' });
     }
-    if (!flavor) {
-      return res.status(400).json({ success: false, message: 'Flavor selection is required' });
-    }
 
-    // Verify flavor exists
-    const flavorDoc = await Flavor.findById(flavor);
-    if (!flavorDoc) {
-      return res.status(400).json({ success: false, message: 'Selected flavor does not exist' });
+    // Verify flavor exists if provided (optional)
+    let validFlavor = null;
+    if (flavor && String(flavor).trim() !== '' && flavor !== 'none') {
+      const flavorDoc = await Flavor.findById(flavor);
+      if (flavorDoc) {
+        validFlavor = flavorDoc._id;
+      }
     }
 
     const newIceCream = await IceCream.create({
       name: name.trim(),
-      description: description.trim(),
+      description: description ? description.trim() : '',
       price: Number(price),
       image: image || 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80',
-      flavor,
+      flavor: validFlavor,
       status: status || 'Available',
     });
 
@@ -116,17 +113,20 @@ export const updateIceCream = async (req, res) => {
     }
 
     if (name) iceCream.name = name.trim();
-    if (description) iceCream.description = description.trim();
+    if (description !== undefined) iceCream.description = description ? description.trim() : '';
     if (price !== undefined && !isNaN(price)) iceCream.price = Number(price);
     if (image) iceCream.image = image;
     if (status) iceCream.status = status;
 
-    if (flavor && flavor !== String(iceCream.flavor)) {
-      const flavorDoc = await Flavor.findById(flavor);
-      if (!flavorDoc) {
-        return res.status(400).json({ success: false, message: 'Selected flavor does not exist' });
+    if (flavor !== undefined) {
+      if (flavor && flavor !== 'none' && String(flavor).trim() !== '') {
+        const flavorDoc = await Flavor.findById(flavor);
+        if (flavorDoc) {
+          iceCream.flavor = flavorDoc._id;
+        }
+      } else {
+        iceCream.flavor = null;
       }
-      iceCream.flavor = flavor;
     }
 
     const saved = await iceCream.save();

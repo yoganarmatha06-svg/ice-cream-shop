@@ -9,7 +9,8 @@ const iceCreamSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: [true, 'Description is required'],
+      required: false,
+      default: '',
       trim: true,
     },
     price: {
@@ -25,7 +26,8 @@ const iceCreamSchema = new mongoose.Schema(
     flavor: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Flavor',
-      required: [true, 'Flavor selection is required'],
+      required: false,
+      default: null,
     },
     status: {
       type: String,

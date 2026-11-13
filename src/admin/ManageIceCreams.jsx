@@ -103,7 +103,7 @@ const ManageIceCreams = () => {
       description: '',
       price: '',
       image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80',
-      flavor: flavors.length > 0 ? flavors[0]._id : '',
+      flavor: '',
       status: 'Available',
     });
     setModalOpen(true);
@@ -154,16 +154,8 @@ const ManageIceCreams = () => {
       showToast('Please enter an ice cream variety name', 'error');
       return;
     }
-    if (!formData.description.trim()) {
-      showToast('Please provide a description', 'error');
-      return;
-    }
     if (formData.price === '' || isNaN(formData.price) || Number(formData.price) < 0) {
       showToast('Please enter a valid price (>= 0)', 'error');
-      return;
-    }
-    if (!formData.flavor) {
-      showToast('Please select a flavor', 'error');
       return;
     }
     if (!formData.image.trim()) {
@@ -481,7 +473,7 @@ const ManageIceCreams = () => {
                   </span>
                 </div>
                 <h3>{item.name}</h3>
-                <p>{item.description}</p>
+                {item.description && <p>{item.description}</p>}
 
                 <div className="admin-variety-footer">
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -555,19 +547,6 @@ const ManageIceCreams = () => {
                   />
                 </div>
 
-                {/* Description */}
-                <div className="form-group-item">
-                  <label>Description *</label>
-                  <textarea
-                    required
-                    rows={3}
-                    placeholder="Describe the texture, organic ingredients, and tasting notes..."
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="modal-input modal-textarea"
-                  />
-                </div>
-
                 {/* Price & Flavor Selection Row */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   {/* Price */}
@@ -591,18 +570,17 @@ const ManageIceCreams = () => {
                     </div>
                   </div>
 
-                  {/* Flavor Selection */}
+                  {/* Flavor Selection (Optional) */}
                   <div className="form-group-item">
-                    <label>Select Flavor *</label>
+                    <label>Select Flavor <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(Optional)</span></label>
                     <select
-                      required
                       value={formData.flavor}
                       onChange={(e) => setFormData({ ...formData, flavor: e.target.value })}
                       className="modal-input"
                       style={{ background: '#fff' }}
                     >
-                      <option value="" disabled>
-                        -- Select a Flavor --
+                      <option value="">
+                        -- None / No Flavor Assigned --
                       </option>
                       {flavors.map((f) => (
                         <option key={f._id} value={f._id}>
