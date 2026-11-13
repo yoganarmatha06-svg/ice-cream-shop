@@ -17,9 +17,58 @@ import {
   Tag,
   DollarSign,
   Sparkles,
+  ClipboardPaste,
+  FolderOpen,
+  Image as ImageIcon,
+  RefreshCw,
 } from 'lucide-react';
 import { iceCreamsAPI, flavorsAPI, uploadAPI } from '../services/api';
 import Loader from '../components/Loader';
+
+const POPULAR_IMAGE_PRESETS = [
+  {
+    name: 'Butterscotch',
+    url: 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    name: 'Rich Chocolate',
+    url: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    name: 'Classic Vanilla',
+    url: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    name: 'Fresh Strawberry',
+    url: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    name: 'Alphonso Mango',
+    url: 'https://images.unsplash.com/photo-1505394033641-40c6ad1178d7?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    name: 'Roasted Pistachio',
+    url: 'https://images.unsplash.com/photo-1580915411954-282cb1b0d780?auto=format&fit=crop&w=600&q=80',
+  },
+];
+
+// Clean URLs copied from Google Images, Unsplash or web
+const cleanImageUrl = (raw) => {
+  if (!raw) return '';
+  let url = raw.trim();
+  // Decode Google Images redirect link (imgurl query param)
+  if (url.includes('google.') && url.includes('imgurl=')) {
+    try {
+      const match = url.match(/[?&]imgurl=([^&]+)/);
+      if (match && match[1]) {
+        return decodeURIComponent(match[1]);
+      }
+    } catch (e) {
+      // fallback
+    }
+  }
+  return url;
+};
 
 const ManageIceCreams = () => {
   const [iceCreams, setIceCreams] = useState([]);
@@ -59,6 +108,9 @@ const ManageIceCreams = () => {
   // Image upload tab: 'upload' or 'url'
   const [imageUploadMode, setImageUploadMode] = useState('upload');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadedFileInfo, setUploadedFileInfo] = useState(null);
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -102,10 +154,13 @@ const ManageIceCreams = () => {
       name: '',
       description: '',
       price: '',
-      image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80',
+      image: '',
       flavor: '',
       status: 'Available',
     });
+    setUploadedFileInfo(null);
+    setImageLoadError(false);
+    setImageUploadMode('upload');
     setModalOpen(true);
   };
 
@@ -120,29 +175,93 @@ const ManageIceCreams = () => {
       flavor: item.flavor?._id || item.flavor || '',
       status: item.status || 'Available',
     });
+    setUploadedFileInfo(null);
+    setImageLoadError(false);
+    setImageUploadMode(item.image?.startsWith('/uploads') ? 'upload' : 'url');
     setModalOpen(true);
   };
 
-  // Handle Image File Upload via Multer
-  const handleImageFileChange = async (e) => {
-    const file = e.target.files[0];
+  // Process Local Device Image File (Preview + Multer Upload + Base64 Fallback)
+  const processImageFile = async (file) => {
     if (!file) return;
 
-    const data = new FormData();
-    data.append('image', file);
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select a valid image file (PNG, JPG, WebP, SVG)', 'error');
+      return;
+    }
 
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('File size is too large (maximum 10MB)', 'error');
+      return;
+    }
+
+    setUploadedFileInfo({
+      name: file.name,
+      size: (file.size / 1024).toFixed(1) + ' KB',
+    });
+    setImageLoadError(false);
+
+    // 1. Immediately create Base64 preview for instant visual feedback from device
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64Url = event.target.result;
+      setFormData((prev) => ({ ...prev, image: base64Url }));
+
+      // 2. Upload to server storage via Multer
+      const data = new FormData();
+      data.append('image', file);
+
+      try {
+        setUploadingImage(true);
+        const res = await uploadAPI.uploadImage(data);
+        if (res && res.success && res.url) {
+          setFormData((prev) => ({ ...prev, image: res.url }));
+          showToast(`Image "${file.name}" uploaded successfully from your device!`);
+        }
+      } catch (err) {
+        console.warn('Backend upload note, using device preview:', err);
+        setFormData((prev) => ({ ...prev, image: base64Url }));
+        showToast('Image loaded from device! Ready to save.');
+      } finally {
+        setUploadingImage(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      processImageFile(e.target.files[0]);
+    }
+  };
+
+  // URL input handler with Google Images decoding
+  const handleUrlChange = (value) => {
+    const cleaned = cleanImageUrl(value);
+    setFormData((prev) => ({ ...prev, image: cleaned }));
+    setUploadedFileInfo(null);
+    setImageLoadError(false);
+  };
+
+  // Paste from Clipboard handler
+  const handlePasteFromClipboard = async () => {
     try {
-      setUploadingImage(true);
-      const res = await uploadAPI.uploadImage(data);
-      if (res.success) {
-        setFormData((prev) => ({ ...prev, image: res.url }));
-        showToast('Image uploaded successfully!');
+      const text = await navigator.clipboard.readText();
+      if (!text || !text.trim()) {
+        showToast('Clipboard is empty. Copy an image link first.', 'error');
+        return;
+      }
+      const cleaned = cleanImageUrl(text);
+      if (cleaned.startsWith('http') || cleaned.startsWith('data:image')) {
+        setFormData((prev) => ({ ...prev, image: cleaned }));
+        setUploadedFileInfo(null);
+        setImageLoadError(false);
+        showToast('Image URL pasted from clipboard!');
+      } else {
+        showToast('Copied text does not appear to be an image URL', 'error');
       }
     } catch (err) {
-      console.error('Image upload failed:', err);
-      showToast(err.message || 'Image upload failed. You can paste an image URL instead.', 'error');
-    } finally {
-      setUploadingImage(false);
+      showToast('Clipboard access denied. Please press Ctrl+V to paste.', 'error');
     }
   };
 
@@ -647,43 +766,154 @@ const ManageIceCreams = () => {
                   </div>
                 </div>
 
-                {/* Image Upload / URL Input */}
+                {/* Enhanced Image Upload / URL Input */}
                 <div className="form-group-item">
                   <label>Ice Cream Image *</label>
 
                   <div className="image-upload-section">
-                    {/* Live Preview */}
-                    {formData.image && (
-                      <img
-                        src={formData.image}
-                        alt="Preview"
-                        className="image-preview-frame"
-                        onError={(e) => {
-                          e.target.src = 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=300&q=80';
+                    {/* Live Preview Box */}
+                    {formData.image ? (
+                      <div
+                        style={{
+                          marginBottom: '16px',
+                          textAlign: 'center',
+                          padding: '16px',
+                          background: '#fffbf8',
+                          borderRadius: '16px',
+                          border: '1px solid #f1e7e4',
                         }}
-                      />
+                      >
+                        <div style={{ position: 'relative', display: 'inline-block' }}>
+                          <img
+                            src={formData.image}
+                            alt="Ice Cream Preview"
+                            style={{
+                              width: '140px',
+                              height: '140px',
+                              borderRadius: '18px',
+                              objectFit: 'cover',
+                              boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                              border: '3px solid #ffffff',
+                              display: 'block',
+                            }}
+                            onLoad={() => setImageLoadError(false)}
+                            onError={() => setImageLoadError(true)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({ ...prev, image: '' }));
+                              setUploadedFileInfo(null);
+                              setImageLoadError(false);
+                            }}
+                            title="Remove this image"
+                            style={{
+                              position: 'absolute',
+                              top: '-8px',
+                              right: '-8px',
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '50%',
+                              background: '#ef4444',
+                              color: '#ffffff',
+                              border: '2px solid #ffffff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                            }}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+
+                        {imageLoadError ? (
+                          <div
+                            style={{
+                              marginTop: '10px',
+                              padding: '8px 12px',
+                              background: '#fee2e2',
+                              color: '#b91c1c',
+                              borderRadius: '10px',
+                              fontSize: '0.78rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px',
+                            }}
+                          >
+                            <AlertCircle size={14} />
+                            <span>Unable to preview this image link. Make sure you copied "Copy image address" or use "Upload from Device".</span>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              marginTop: '8px',
+                              fontSize: '0.78rem',
+                              color: '#059669',
+                              fontWeight: 700,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                            }}
+                          >
+                            <CheckCircle2 size={14} />
+                            <span>Image preview ready</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          marginBottom: '16px',
+                          padding: '16px',
+                          borderRadius: '16px',
+                          background: '#faf5f5',
+                          border: '1px dashed #e2d5d2',
+                          textAlign: 'center',
+                          color: 'var(--text-muted)',
+                          fontSize: '0.82rem',
+                        }}
+                      >
+                        <div style={{ fontSize: '1.8rem', marginBottom: '4px' }}>🍨</div>
+                        <span>No image selected yet. Upload from device or paste an image link below.</span>
+                      </div>
                     )}
 
-                    {/* Mode Switcher: Upload File or Image URL */}
-                    <div className="upload-tabs">
+                    {/* Mode Switcher: Upload from Device or Paste Image URL */}
+                    <div className="upload-tabs" style={{ marginBottom: '16px' }}>
                       <button
                         type="button"
-                        onClick={() => setImageUploadMode('upload')}
+                        onClick={() => {
+                          setImageUploadMode('upload');
+                          setImageLoadError(false);
+                        }}
                         className={`upload-tab-btn ${imageUploadMode === 'upload' ? 'active' : ''}`}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 18px', fontWeight: 700 }}
                       >
-                        <Upload size={14} /> Upload File
+                        <Upload size={15} />
+                        <span>Upload from Device</span>
                       </button>
                       <button
                         type="button"
-                        onClick={() => setImageUploadMode('url')}
+                        onClick={() => {
+                          setImageUploadMode('url');
+                          setImageLoadError(false);
+                        }}
                         className={`upload-tab-btn ${imageUploadMode === 'url' ? 'active' : ''}`}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 18px', fontWeight: 700 }}
                       >
-                        <LinkIcon size={14} /> Paste Image URL
+                        <LinkIcon size={15} />
+                        <span>Paste URL (Google / Web)</span>
                       </button>
                     </div>
 
+                    {/* Tab 1: Upload from Local Device */}
                     {imageUploadMode === 'upload' ? (
                       <div>
+                        {/* Hidden Native File Input */}
                         <input
                           type="file"
                           accept="image/*"
@@ -691,26 +921,208 @@ const ManageIceCreams = () => {
                           id="varietyImageFile"
                           style={{ display: 'none' }}
                         />
-                        <label
-                          htmlFor="varietyImageFile"
-                          className="btn-secondary"
-                          style={{ display: 'inline-flex', padding: '10px 20px', cursor: 'pointer', fontSize: '0.88rem' }}
+
+                        {/* Interactive Drag & Drop / Click Zone */}
+                        <div
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            setIsDragging(true);
+                          }}
+                          onDragLeave={() => setIsDragging(false)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setIsDragging(false);
+                            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                              processImageFile(e.dataTransfer.files[0]);
+                            }
+                          }}
+                          onClick={() => document.getElementById('varietyImageFile')?.click()}
+                          style={{
+                            border: isDragging ? '2px dashed var(--strawberry)' : '2px dashed #fbcfe8',
+                            background: isDragging ? '#fff0f3' : '#fffdfa',
+                            borderRadius: '18px',
+                            padding: '24px 20px',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                          }}
                         >
-                          {uploadingImage ? 'Uploading...' : 'Choose File From Computer'}
-                        </label>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-                          JPEG, PNG, WebP up to 5MB
-                        </p>
+                          <div
+                            style={{
+                              width: '52px',
+                              height: '52px',
+                              borderRadius: '50%',
+                              background: '#fdf2f4',
+                              color: 'var(--strawberry)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              margin: '0 auto 10px',
+                            }}
+                          >
+                            {uploadingImage ? <RefreshCw size={24} className="spin" /> : <Upload size={24} />}
+                          </div>
+
+                          <div style={{ fontWeight: 800, fontSize: '0.98rem', color: 'var(--chocolate-dark)', marginBottom: '4px' }}>
+                            {uploadingImage ? 'Uploading image from device...' : 'Choose Image From Your Computer / Phone'}
+                          </div>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0 auto 10px', maxWidth: '340px' }}>
+                            Click to browse local files or drag and drop your photo here (PNG, JPG, WebP, SVG up to 10MB)
+                          </p>
+
+                          <span
+                            className="btn-secondary"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '8px 18px',
+                              fontSize: '0.82rem',
+                              pointerEvents: 'none',
+                            }}
+                          >
+                            <FolderOpen size={15} /> Browse Local Files
+                          </span>
+                        </div>
+
+                        {/* Uploaded File Info Card */}
+                        {uploadedFileInfo && (
+                          <div
+                            style={{
+                              marginTop: '12px',
+                              padding: '10px 14px',
+                              background: '#ecfdf5',
+                              border: '1px solid #a7f3d0',
+                              borderRadius: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              fontSize: '0.82rem',
+                              color: '#065f46',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <CheckCircle2 size={16} color="#059669" />
+                              <span style={{ fontWeight: 700 }}>{uploadedFileInfo.name}</span>
+                              <span style={{ color: '#047857', opacity: 0.8 }}>({uploadedFileInfo.size})</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setUploadedFileInfo(null);
+                                setFormData((prev) => ({ ...prev, image: '' }));
+                              }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#dc2626',
+                                cursor: 'pointer',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <div style={{ marginTop: '8px' }}>
-                        <input
-                          type="url"
-                          placeholder="https://example.com/artisan-icecream.jpg"
-                          value={formData.image}
-                          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                          className="modal-input"
-                        />
+                      /* Tab 2: Paste Image URL (Google / Web) */
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {/* Input bar with paste and clear buttons */}
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <div style={{ position: 'relative', flex: 1 }}>
+                            <input
+                              type="text"
+                              placeholder="Paste image link copied from Google, Unsplash, or any website..."
+                              value={formData.image}
+                              onChange={(e) => handleUrlChange(e.target.value)}
+                              className="modal-input"
+                              style={{ width: '100%', paddingRight: formData.image ? '36px' : '14px' }}
+                            />
+                            {formData.image && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData((prev) => ({ ...prev, image: '' }));
+                                  setImageLoadError(false);
+                                }}
+                                title="Clear URL"
+                                style={{
+                                  position: 'absolute',
+                                  right: '10px',
+                                  top: '50%',
+                                  transform: 'translateY(-50%)',
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  color: '#9c8e8c',
+                                }}
+                              >
+                                <X size={16} />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Paste from Clipboard Button */}
+                          <button
+                            type="button"
+                            onClick={handlePasteFromClipboard}
+                            className="btn-secondary"
+                            style={{
+                              padding: '10px 16px',
+                              fontSize: '0.85rem',
+                              whiteSpace: 'nowrap',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              borderRadius: '12px',
+                            }}
+                            title="Paste link copied from Google or browser"
+                          >
+                            <ClipboardPaste size={15} />
+                            <span>Paste Link</span>
+                          </button>
+                        </div>
+
+                        <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: 0 }}>
+                          💡 Tip: On Google Images, right-click the photo and select <strong>"Copy image address"</strong>, then click <strong>"Paste Link"</strong> above.
+                        </p>
+
+                        {/* Popular Presets Chips */}
+                        <div style={{ marginTop: '4px' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                            Or choose a popular artisan sample:
+                          </div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {POPULAR_IMAGE_PRESETS.map((preset) => (
+                              <button
+                                key={preset.name}
+                                type="button"
+                                onClick={() => {
+                                  setFormData((prev) => ({ ...prev, image: preset.url }));
+                                  setImageLoadError(false);
+                                  setUploadedFileInfo(null);
+                                  showToast(`Selected "${preset.name}" preset image!`);
+                                }}
+                                style={{
+                                  padding: '4px 10px',
+                                  borderRadius: '999px',
+                                  border: formData.image === preset.url ? '1.5px solid var(--strawberry)' : '1px solid #ebdcd7',
+                                  background: formData.image === preset.url ? '#fdf2f4' : '#ffffff',
+                                  color: formData.image === preset.url ? 'var(--strawberry)' : 'var(--chocolate-dark)',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease',
+                                }}
+                              >
+                                🍦 {preset.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
