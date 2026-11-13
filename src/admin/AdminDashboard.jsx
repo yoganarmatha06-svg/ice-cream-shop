@@ -13,6 +13,7 @@ import {
   ChevronRight,
   RefreshCw,
   Users,
+  Settings,
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import Loader from '../components/Loader';
@@ -78,6 +79,14 @@ const AdminDashboard = () => {
           >
             <RefreshCw size={15} /> Refresh
           </button>
+          <Link
+            to="/admin/settings"
+            className="btn-secondary"
+            style={{ padding: '10px 18px', fontSize: '0.88rem' }}
+            title="Store & Parlour Settings"
+          >
+            <Settings size={15} /> Settings
+          </Link>
           <Link
             to="/admin/icecreams"
             className="btn-primary"

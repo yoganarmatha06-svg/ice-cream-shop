@@ -32,6 +32,7 @@ import AdminDashboard from './admin/AdminDashboard';
 import ManageIceCreams from './admin/ManageIceCreams';
 import ManageFlavors from './admin/ManageFlavors';
 import ManageCustomers from './admin/ManageCustomers';
+import AdminSettings from './admin/AdminSettings';
 
 // Styles
 import './styles/global.css';
@@ -82,6 +83,7 @@ function App() {
                 <Route path="icecreams" element={<ManageIceCreams />} />
                 <Route path="flavors" element={<ManageFlavors />} />
                 <Route path="customers" element={<ManageCustomers />} />
+                <Route path="settings" element={<AdminSettings />} />
                 <Route path="products" element={<ManageIceCreams />} />
                 <Route path="categories" element={<ManageFlavors />} />
               </Route>

@@ -12,6 +12,7 @@ import {
   X,
   ShieldCheck,
   Store,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import '../styles/admin.css';
@@ -164,6 +165,15 @@ const AdminLayout = () => {
             <Users size={20} />
             <span>Customer Management</span>
           </NavLink>
+
+          <NavLink
+            to="/admin/settings"
+            className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+            onClick={() => setSidebarOpen(false)}
+          >
+            <Settings size={20} />
+            <span>Store Settings</span>
+          </NavLink>
         </nav>
 
         {/* Sidebar Footer */}
@@ -241,15 +251,14 @@ const AdminLayout = () => {
           <span>Flavors</span>
         </NavLink>
 
-        <Link
-          to="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="admin-bottom-tab"
+        <NavLink
+          to="/admin/settings"
+          className={({ isActive }) => `admin-bottom-tab ${isActive ? 'active' : ''}`}
+          onClick={() => setSidebarOpen(false)}
         >
-          <Store size={20} />
-          <span>Store</span>
-        </Link>
+          <Settings size={20} />
+          <span>Settings</span>
+        </NavLink>
 
         <button
           type="button"

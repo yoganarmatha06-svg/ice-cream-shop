@@ -1,9 +1,11 @@
+import mongoose from 'mongoose';
 import Admin from '../models/Admin.js';
 import User from '../models/User.js';
 import IceCream from '../models/IceCream.js';
 import Flavor from '../models/Flavor.js';
 import Order from '../models/Order.js';
 import Address from '../models/Address.js';
+import Setting from '../models/Setting.js';
 import { generateToken, setTokenCookie } from '../middleware/authMiddleware.js';
 
 // @desc    Admin Login Authentication
@@ -586,3 +588,165 @@ export const createCoupon = async (req, res) => res.json({ success: true, data: 
 export const deleteCoupon = async (req, res) => res.json({ success: true, data: {} });
 export const getAllReviews = async (req, res) => res.json({ success: true, data: [] });
 export const deleteReview = async (req, res) => res.json({ success: true, data: {} });
+
+// ==========================================
+// STORE SETTINGS CONTROLLERS
+// ==========================================
+
+// @desc    Get current store & parlour settings
+// @route   GET /api/admin/settings
+export const getSettings = async (req, res) => {
+  try {
+    let settings = await Setting.findOne();
+    if (!settings) {
+      settings = await Setting.create({});
+    }
+
+    const isConnected = mongoose.connection.readyState === 1;
+    const dbStatus = isConnected ? 'Connected (Atlas Cloud DB)' : 'In-Memory / Local';
+
+    res.json({
+      success: true,
+      data: settings,
+      meta: {
+        dbStatus,
+        host: mongoose.connection.host || 'cluster0.mongodb.net',
+        dbName: mongoose.connection.name || 'icecreamshop',
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update store & parlour settings
+// @route   PUT /api/admin/settings
+export const updateSettings = async (req, res) => {
+  try {
+    let settings = await Setting.findOne();
+    if (!settings) {
+      settings = new Setting(req.body);
+    } else {
+      Object.assign(settings, req.body);
+    }
+    await settings.save();
+
+    res.json({
+      success: true,
+      data: settings,
+      message: 'Store settings saved successfully!',
+    });
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update admin password securely
+// @route   PUT /api/admin/settings/password
+export const updateAdminPassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both current and new passwords',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters long',
+      });
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password and confirmation password do not match',
+      });
+    }
+
+    let admin = await Admin.findById(req.user._id);
+    if (!admin) {
+      admin = await User.findById(req.user._id);
+    }
+
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Administrator account not found' });
+    }
+
+    const isMatch = await admin.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Incorrect current password. Please try again.',
+      });
+    }
+
+    admin.password = newPassword;
+    await admin.save();
+
+    res.json({
+      success: true,
+      message: 'Administrator password updated successfully!',
+    });
+  } catch (error) {
+    console.error('Error updating admin password:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update admin profile info (Name & Email)
+// @route   PUT /api/admin/settings/profile
+export const updateAdminProfile = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    let admin = await Admin.findById(req.user._id);
+    if (!admin) {
+      admin = await User.findById(req.user._id);
+    }
+
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Administrator account not found' });
+    }
+
+    if (name) admin.name = name.trim();
+    if (email) admin.email = email.toLowerCase().trim();
+
+    await admin.save();
+
+    res.json({
+      success: true,
+      data: {
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+      },
+      message: 'Administrator profile updated successfully!',
+    });
+  } catch (error) {
+    console.error('Error updating admin profile:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Reset and reseed database with fresh sample artisanal varieties
+// @route   POST /api/admin/settings/reset-data
+export const resetSampleData = async (req, res) => {
+  try {
+    const { seedDatabase } = await import('../seedData.js');
+    await seedDatabase();
+    res.json({
+      success: true,
+      message: 'Artisanal database seeded successfully with 12 categories and 18 flavours!',
+    });
+  } catch (error) {
+    console.error('Error resetting database:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
