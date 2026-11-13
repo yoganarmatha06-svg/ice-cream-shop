@@ -7,14 +7,14 @@ export const connectDB = async () => {
   const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/scoop_dreams';
   
   try {
-    // Try connecting to provided URI with a 2.5s timeout
+    // Try connecting to provided URI with a 10s timeout for cloud Atlas connections
     const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 2500,
+      serverSelectionTimeoutMS: 10000,
     });
     console.log(` MongoDB Connected: ${conn.connection.host} (${conn.connection.name})`);
     return conn;
   } catch (err) {
-    console.warn(` Could not connect to MongoDB at ${uri}. Launching embedded in-memory MongoDB engine...`);
+    console.warn(` Could not connect to MongoDB at ${uri} (${err.message}). Launching embedded in-memory MongoDB engine...`);
     try {
       mongoMemoryServer = await MongoMemoryServer.create();
       const memUri = mongoMemoryServer.getUri();
