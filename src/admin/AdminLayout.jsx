@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Store,
   Settings,
+  BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import '../styles/admin.css';
@@ -164,6 +165,15 @@ const AdminLayout = () => {
           >
             <Users size={20} />
             <span>Customer Management</span>
+          </NavLink>
+
+          <NavLink
+            to="/admin/reports"
+            className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+            onClick={() => setSidebarOpen(false)}
+          >
+            <BarChart3 size={20} />
+            <span>Sales Reports</span>
           </NavLink>
 
           <NavLink

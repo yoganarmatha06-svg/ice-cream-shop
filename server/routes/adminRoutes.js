@@ -10,6 +10,7 @@ import {
   updateAdminPassword,
   updateAdminProfile,
   resetSampleData,
+  getSalesReports,
 } from '../controllers/adminController.js';
 import { protect, adminOnly } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
@@ -22,6 +23,7 @@ router.get('/profile', protect, adminOnly, getAdminProfile);
 
 // Admin Dashboard stats (Protected)
 router.get('/dashboard', protect, adminOnly, getDashboardStats);
+router.get('/reports', protect, adminOnly, getSalesReports);
 
 // Customer Management Routes (Protected, Admin Only)
 router.get('/customers', protect, adminOnly, getCustomers);

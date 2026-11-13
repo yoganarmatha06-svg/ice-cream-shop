@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Users,
   Settings,
+  BarChart3,
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import Loader from '../components/Loader';
@@ -79,6 +80,14 @@ const AdminDashboard = () => {
           >
             <RefreshCw size={15} /> Refresh
           </button>
+          <Link
+            to="/admin/reports"
+            className="btn-secondary"
+            style={{ padding: '10px 18px', fontSize: '0.88rem' }}
+            title="Business & Sales Reports"
+          >
+            <BarChart3 size={15} /> Reports
+          </Link>
           <Link
             to="/admin/settings"
             className="btn-secondary"

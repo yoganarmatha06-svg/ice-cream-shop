@@ -6,6 +6,7 @@ import Coupon from './models/Coupon.js';
 import Review from './models/Review.js';
 import Flavor from './models/Flavor.js';
 import IceCream from './models/IceCream.js';
+import Order from './models/Order.js';
 
 export const seedDatabase = async () => {
   try {
@@ -532,6 +533,207 @@ export const seedDatabase = async () => {
     ];
 
     await Review.insertMany(sampleReviews);
+
+    // 5. Seed Realistic Orders for Analytics & Customer History if needed
+    const existingOrdersCount = await Order.countDocuments();
+    if (existingOrdersCount < 5) {
+      const now = new Date();
+      const sampleCustomers = [
+        { name: 'Priya Sharma', email: 'priya.sharma@gmail.com', phone: '+91 98450 12345', city: 'Bengaluru', pincode: '560038', state: 'Karnataka', street: '42 CMH Road, Indiranagar' },
+        { name: 'Rahul Verma', email: 'rahul.verma@outlook.com', phone: '+91 98201 54321', city: 'Bengaluru', pincode: '560001', state: 'Karnataka', street: '15 MG Road' },
+        { name: 'Ananya Deshmukh', email: 'ananya.d@gmail.com', phone: '+91 97654 89123', city: 'Bengaluru', pincode: '560034', state: 'Karnataka', street: '78 Koramangala 4th Block' },
+        { name: 'Karthik Raja', email: 'karthik.raja@gmail.com', phone: '+91 94440 67890', city: 'Bengaluru', pincode: '560041', state: 'Karnataka', street: '22 Jayanagar 9th Block' },
+        { name: 'Sneha Iyer', email: 'sneha.iyer@yahoo.com', phone: '+91 98860 32198', city: 'Bengaluru', pincode: '560068', state: 'Karnataka', street: '9 HSR Layout Sector 1' },
+        { name: 'Aditya Nair', email: 'aditya.nair@gmail.com', phone: '+91 99000 45678', city: 'Bengaluru', pincode: '560078', state: 'Karnataka', street: '34 JP Nagar Phase 2' },
+      ];
+
+      const ordersToSeed = [
+        {
+          daysAgo: 11,
+          customer: sampleCustomers[0],
+          paymentMethod: 'UPI / NetBanking',
+          paymentStatus: 'Completed',
+          orderStatus: 'Delivered',
+          discount: 50,
+          items: [
+            { prodIdx: 1, qty: 2, size: 'Regular Scoop (120ml)' },
+            { prodIdx: 0, qty: 1, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 9,
+          customer: sampleCustomers[1],
+          paymentMethod: 'Cash on Delivery',
+          paymentStatus: 'Completed',
+          orderStatus: 'Delivered',
+          discount: 0,
+          items: [
+            { prodIdx: 2, qty: 2, size: 'Large Tub (500ml)' },
+            { prodIdx: 5, qty: 1, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 8,
+          customer: sampleCustomers[2],
+          paymentMethod: 'UPI / NetBanking',
+          paymentStatus: 'Completed',
+          orderStatus: 'Delivered',
+          discount: 30,
+          items: [
+            { prodIdx: 3, qty: 3, size: 'Regular Scoop (120ml)' },
+            { prodIdx: 4, qty: 1, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 7,
+          customer: sampleCustomers[3],
+          paymentMethod: 'Credit/Debit Card',
+          paymentStatus: 'Completed',
+          orderStatus: 'Delivered',
+          discount: 0,
+          items: [
+            { prodIdx: 6, qty: 2, size: 'Regular Scoop (120ml)' },
+            { prodIdx: 1, qty: 2, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 6,
+          customer: sampleCustomers[4],
+          paymentMethod: 'UPI / NetBanking',
+          paymentStatus: 'Completed',
+          orderStatus: 'Delivered',
+          discount: 40,
+          items: [
+            { prodIdx: 5, qty: 2, size: 'Large Tub (500ml)' },
+            { prodIdx: 7, qty: 1, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 5,
+          customer: sampleCustomers[0],
+          paymentMethod: 'UPI / NetBanking',
+          paymentStatus: 'Completed',
+          orderStatus: 'Delivered',
+          discount: 0,
+          items: [
+            { prodIdx: 1, qty: 3, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 4,
+          customer: sampleCustomers[5],
+          paymentMethod: 'Cash on Delivery',
+          paymentStatus: 'Completed',
+          orderStatus: 'Delivered',
+          discount: 0,
+          items: [
+            { prodIdx: 0, qty: 2, size: 'Regular Scoop (120ml)' },
+            { prodIdx: 2, qty: 1, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 3,
+          customer: sampleCustomers[2],
+          paymentMethod: 'UPI / NetBanking',
+          paymentStatus: 'Completed',
+          orderStatus: 'Delivered',
+          discount: 60,
+          items: [
+            { prodIdx: 3, qty: 2, size: 'Large Tub (500ml)' },
+            { prodIdx: 9, qty: 1, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 2,
+          customer: sampleCustomers[1],
+          paymentMethod: 'UPI / NetBanking',
+          paymentStatus: 'Completed',
+          orderStatus: 'Delivered',
+          discount: 0,
+          items: [
+            { prodIdx: 1, qty: 2, size: 'Regular Scoop (120ml)' },
+            { prodIdx: 5, qty: 2, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 1,
+          customer: sampleCustomers[3],
+          paymentMethod: 'UPI / NetBanking',
+          paymentStatus: 'Completed',
+          orderStatus: 'Confirmed',
+          discount: 25,
+          items: [
+            { prodIdx: 10, qty: 2, size: 'Regular Scoop (120ml)' },
+            { prodIdx: 8, qty: 1, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 0,
+          customer: sampleCustomers[4],
+          paymentMethod: 'UPI / NetBanking',
+          paymentStatus: 'Completed',
+          orderStatus: 'Preparing Scoops',
+          discount: 0,
+          items: [
+            { prodIdx: 1, qty: 2, size: 'Regular Scoop (120ml)' },
+            { prodIdx: 2, qty: 2, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+        {
+          daysAgo: 0,
+          customer: sampleCustomers[0],
+          paymentMethod: 'Cash on Delivery',
+          paymentStatus: 'Pending',
+          orderStatus: 'Processing',
+          discount: 0,
+          items: [
+            { prodIdx: 5, qty: 2, size: 'Large Tub (500ml)' },
+            { prodIdx: 0, qty: 1, size: 'Regular Scoop (120ml)' },
+          ],
+        },
+      ];
+
+      for (const ordData of ordersToSeed) {
+        const orderDate = new Date(now.getTime() - ordData.daysAgo * 24 * 60 * 60 * 1000);
+        let orderTotal = 0;
+        const productsList = ordData.items.map((it) => {
+          const pr = createdProducts[it.prodIdx] || createdProducts[0];
+          const itemPrice = pr.price || 8;
+          orderTotal += itemPrice * it.qty;
+          return {
+            product: pr._id,
+            name: pr.name,
+            image: pr.image,
+            flavour: pr.flavour || pr.name,
+            quantity: it.qty,
+            price: itemPrice,
+            selectedSize: it.size,
+          };
+        });
+
+        await Order.create({
+          orderId: `SD-${Date.now().toString().slice(-5)}-${Math.floor(100 + Math.random() * 900)}`,
+          products: productsList,
+          deliveryAddress: {
+            fullName: ordData.customer.name,
+            email: ordData.customer.email,
+            phone: ordData.customer.phone,
+            street: ordData.customer.street,
+            city: ordData.customer.city,
+            state: ordData.customer.state,
+            pincode: ordData.customer.pincode,
+          },
+          totalAmount: Math.max(1, orderTotal - (ordData.discount || 0)),
+          discountAmount: ordData.discount || 0,
+          paymentMethod: ordData.paymentMethod,
+          paymentStatus: ordData.paymentStatus,
+          orderStatus: ordData.orderStatus,
+          createdAt: orderDate,
+          updatedAt: orderDate,
+        });
+      }
+      console.log(' Sample historical orders seeded for Analytics & Reports.');
+    }
 
     console.log(` Scoop Dreams database seeded successfully with ${createdCategories.length} categories and ${createdProducts.length} artisanal flavours!`);
   } catch (error) {
