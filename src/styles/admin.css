@@ -484,6 +484,50 @@
   background: #64748b;
 }
 
+/* Order Status Pills */
+.status-processing {
+  background: #fef3c7;
+  color: #b45309;
+}
+.status-processing::before {
+  background: #b45309;
+}
+.status-confirmed {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.status-confirmed::before {
+  background: #0369a1;
+}
+.status-preparing {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+.status-preparing::before {
+  background: #7e22ce;
+}
+.status-delivery {
+  background: #ffedd5;
+  color: #c2410c;
+}
+.status-delivery::before {
+  background: #c2410c;
+}
+.status-delivered {
+  background: #dcfce7;
+  color: #15803d;
+}
+.status-delivered::before {
+  background: #15803d;
+}
+.status-cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.status-cancelled::before {
+  background: #b91c1c;
+}
+
 /* Action Icon Buttons */
 .table-actions {
   display: flex;

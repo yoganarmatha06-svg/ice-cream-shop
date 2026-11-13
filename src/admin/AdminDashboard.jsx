@@ -13,6 +13,7 @@ import {
   ChevronRight,
   RefreshCw,
   Users,
+  ShoppingBag,
   Settings,
   BarChart3,
 } from 'lucide-react';
@@ -80,6 +81,14 @@ const AdminDashboard = () => {
           >
             <RefreshCw size={15} /> Refresh
           </button>
+          <Link
+            to="/admin/orders"
+            className="btn-secondary"
+            style={{ padding: '10px 18px', fontSize: '0.88rem' }}
+            title="Order Status & Fulfillment"
+          >
+            <ShoppingBag size={15} /> Orders
+          </Link>
           <Link
             to="/admin/reports"
             className="btn-secondary"
@@ -229,6 +238,13 @@ const AdminDashboard = () => {
             style={{ padding: '12px 24px', fontSize: '0.92rem' }}
           >
             <Users size={18} /> Manage Customers <ArrowRight size={16} />
+          </Link>
+          <Link
+            to="/admin/orders"
+            className="btn-secondary"
+            style={{ padding: '12px 24px', fontSize: '0.92rem' }}
+          >
+            <ShoppingBag size={18} /> Manage Orders & Status <ArrowRight size={16} />
           </Link>
         </div>
       </div>

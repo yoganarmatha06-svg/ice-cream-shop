@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   IceCream,
   Sparkles,
+  ShoppingBag,
   Users,
   ExternalLink,
   LogOut,
@@ -159,6 +160,15 @@ const AdminLayout = () => {
           </NavLink>
 
           <NavLink
+            to="/admin/orders"
+            className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+            onClick={() => setSidebarOpen(false)}
+          >
+            <ShoppingBag size={20} />
+            <span>Orders & Status</span>
+          </NavLink>
+
+          <NavLink
             to="/admin/customers"
             className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
             onClick={() => setSidebarOpen(false)}
@@ -259,6 +269,15 @@ const AdminLayout = () => {
         >
           <Sparkles size={20} />
           <span>Flavors</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin/orders"
+          className={({ isActive }) => `admin-bottom-tab ${isActive ? 'active' : ''}`}
+          onClick={() => setSidebarOpen(false)}
+        >
+          <ShoppingBag size={20} />
+          <span>Orders</span>
         </NavLink>
 
         <NavLink
